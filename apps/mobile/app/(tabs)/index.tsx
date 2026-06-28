@@ -1,8 +1,7 @@
 import type { WarrantyStatus } from "@repo/validators";
 import { useQuery } from "@tanstack/react-query";
-import { useNavigation } from "expo-router";
-import { Plus } from "lucide-react-native";
-import { useLayoutEffect, useRef, useState } from "react";
+import { LayoutGrid, List, Plus } from "lucide-react-native";
+import { useRef, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
@@ -11,10 +10,12 @@ import {
   Text,
   View,
 } from "react-native";
+import Animated, { FadeInDown } from "react-native-reanimated";
 import {
   CreateDeviceSheet,
   type CreateDeviceSheetRef,
 } from "../../components/create-device-sheet";
+import { DeviceCard } from "../../components/device-card";
 import { DeviceListItem } from "../../components/device-list-item";
 import { Input, Muted } from "../../components/ui";
 import {
@@ -30,12 +31,12 @@ const STATUS_FILTERS: { label: string; value?: WarrantyStatus }[] = [
 ];
 
 export default function DeviceListScreen() {
-  const navigation = useNavigation();
   const sheetRef = useRef<CreateDeviceSheetRef>(null);
 
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState<WarrantyStatus | undefined>(undefined);
   const [page, setPage] = useState(1);
+  const [view, setView] = useState<"list" | "grid">("list");
 
   const query = {
     ...(search ? { search } : {}),
@@ -52,18 +53,24 @@ export default function DeviceListScreen() {
   // Prefetch filter metadata (unused directly here but warms the cache for parity with web).
   useQuery(deviceMetaQueryOptions());
 
-  useLayoutEffect(() => {
-    navigation.setOptions({
-      headerRight: () => (
-        <Pressable
-          onPress={() => sheetRef.current?.present()}
-          className="mr-1 size-9 items-center justify-center rounded-full bg-primary active:opacity-80"
-        >
-          <Plus color="#181818" size={20} />
-        </Pressable>
-      ),
-    });
-  }, [navigation]);
+  const pager =
+    data && data.meta.totalPages > 1 ? (
+      <View className="mt-4 flex-row items-center justify-between">
+        <PagerButton
+          label="Previous"
+          disabled={data.meta.page <= 1}
+          onPress={() => setPage((p) => Math.max(1, p - 1))}
+        />
+        <Muted>
+          Page {data.meta.page} of {data.meta.totalPages}
+        </Muted>
+        <PagerButton
+          label="Next"
+          disabled={data.meta.page >= data.meta.totalPages}
+          onPress={() => setPage((p) => p + 1)}
+        />
+      </View>
+    ) : null;
 
   return (
     <View className="flex-1 bg-bg">
@@ -77,24 +84,27 @@ export default function DeviceListScreen() {
           placeholder="Search name, brand, model, serial…"
           autoCapitalize="none"
         />
-        <View className="flex-row gap-2">
-          {STATUS_FILTERS.map((f) => {
-            const active = status === f.value;
-            return (
-              <Pressable
-                key={f.label}
-                onPress={() => {
-                  setStatus(f.value);
-                  setPage(1);
-                }}
-                className={`rounded-full border px-3 py-1.5 ${active ? "border-primary bg-primary/20" : "border-border"}`}
-              >
-                <Text className={active ? "text-xs text-primary" : "text-xs text-muted"}>
-                  {f.label}
-                </Text>
-              </Pressable>
-            );
-          })}
+        <View className="flex-row items-center gap-2">
+          <View className="flex-1 flex-row gap-2">
+            {STATUS_FILTERS.map((f) => {
+              const active = status === f.value;
+              return (
+                <Pressable
+                  key={f.label}
+                  onPress={() => {
+                    setStatus(f.value);
+                    setPage(1);
+                  }}
+                  className={`rounded-full border px-3 py-1.5 ${active ? "border-primary bg-primary/20" : "border-border"}`}
+                >
+                  <Text className={active ? "text-xs text-primary" : "text-xs text-muted"}>
+                    {f.label}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </View>
+          <ViewToggle view={view} onChange={setView} />
         </View>
       </View>
 
@@ -108,10 +118,25 @@ export default function DeviceListScreen() {
         </View>
       ) : (
         <FlatList
+          // Remount when columns change — FlatList can't switch numColumns live.
+          key={view}
           data={data.data}
           keyExtractor={(d) => d.id}
-          renderItem={({ item }) => <DeviceListItem device={item} />}
-          contentContainerClassName="gap-3 px-4 pb-8"
+          numColumns={view === "grid" ? 2 : 1}
+          columnWrapperClassName={view === "grid" ? "gap-3" : undefined}
+          renderItem={({ item, index }) => (
+            <Animated.View
+              entering={FadeInDown.delay(index * 40).duration(260)}
+              className={view === "grid" ? "flex-1" : undefined}
+            >
+              {view === "grid" ? (
+                <DeviceCard device={item} />
+              ) : (
+                <DeviceListItem device={item} />
+              )}
+            </Animated.View>
+          )}
+          contentContainerClassName="gap-3 px-4 pb-28"
           refreshControl={
             <RefreshControl
               refreshing={isRefetching}
@@ -124,29 +149,54 @@ export default function DeviceListScreen() {
               <Muted>No devices match your filters.</Muted>
             </View>
           }
-          ListFooterComponent={
-            data.meta.totalPages > 1 ? (
-              <View className="mt-4 flex-row items-center justify-between">
-                <PagerButton
-                  label="Previous"
-                  disabled={data.meta.page <= 1}
-                  onPress={() => setPage((p) => Math.max(1, p - 1))}
-                />
-                <Muted>
-                  Page {data.meta.page} of {data.meta.totalPages}
-                </Muted>
-                <PagerButton
-                  label="Next"
-                  disabled={data.meta.page >= data.meta.totalPages}
-                  onPress={() => setPage((p) => p + 1)}
-                />
-              </View>
-            ) : null
-          }
+          ListFooterComponent={pager}
         />
       )}
 
+      {/* Floating action button */}
+      <Pressable
+        onPress={() => sheetRef.current?.present()}
+        accessibilityLabel="Add device"
+        style={{
+          shadowColor: "#00DE6F",
+          shadowOpacity: 0.4,
+          shadowRadius: 12,
+          shadowOffset: { width: 0, height: 4 },
+          elevation: 6,
+        }}
+        className="absolute bottom-6 right-5 size-14 items-center justify-center rounded-full bg-primary active:scale-95 active:opacity-90"
+      >
+        <Plus color="#181818" size={26} />
+      </Pressable>
+
       <CreateDeviceSheet ref={sheetRef} />
+    </View>
+  );
+}
+
+function ViewToggle({
+  view,
+  onChange,
+}: {
+  view: "list" | "grid";
+  onChange: (v: "list" | "grid") => void;
+}) {
+  return (
+    <View className="flex-row rounded-lg border border-border p-0.5">
+      {(["list", "grid"] as const).map((v) => {
+        const active = view === v;
+        const Icon = v === "list" ? List : LayoutGrid;
+        return (
+          <Pressable
+            key={v}
+            onPress={() => onChange(v)}
+            accessibilityLabel={`${v} view`}
+            className={`size-8 items-center justify-center rounded-md ${active ? "bg-primary/20" : ""}`}
+          >
+            <Icon color={active ? "#00DE6F" : "#71717a"} size={18} />
+          </Pressable>
+        );
+      })}
     </View>
   );
 }
