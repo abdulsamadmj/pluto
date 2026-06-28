@@ -1,8 +1,15 @@
 @import "tailwindcss";
 @config "../tailwind.config.ts";
 @source "../../../packages/ui/src";
+
+/* Font families (self-hosted via @fontsource in main.tsx). The Tailwind config's
+   font-sans/font-mono reference these CSS variables. */
+:root {
+  --font-geist-sans: "Geist Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-geist-mono: "Geist Mono", ui-monospace, monospace;
+}
 body {
-  @apply bg-zinc-950 text-zinc-50;
+  @apply bg-zinc-950 text-zinc-50 font-sans antialiased;
 }
 
 /*
