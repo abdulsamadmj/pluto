@@ -35,7 +35,7 @@ export function Phone3DStage({ progress }: { progress: MotionValue<number> }) {
       {canRender3D ? (
         <Suspense fallback={<PhoneFallback2D />}>
           <div className="h-[80vh] w-full">
-            <Phone3D choreo={choreo} />
+            <Phone3D choreo={choreo} progress={progress} />
           </div>
         </Suspense>
       ) : (
