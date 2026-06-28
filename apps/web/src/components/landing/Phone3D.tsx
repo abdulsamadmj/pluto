@@ -173,9 +173,11 @@ export default function Phone3D({
       transition={{ duration: 0.9, ease: "easeOut" }}
     >
       <Canvas
-        dpr={[1, 2]}
-        gl={{ antialias: true, alpha: true }}
+        dpr={[1, 1.5]}
+        gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
         camera={{ position: [0, 0, 10], fov: 35 }}
+        // Let R3F drop resolution under load, then recover when idle.
+        performance={{ min: 0.5 }}
         style={{ width: "100%", height: "100%" }}
       >
         <ambientLight intensity={0.7} />
@@ -183,7 +185,7 @@ export default function Phone3D({
         <pointLight color="#ec4899" position={[-4, -2, -3]} intensity={3} />
         <PhoneModel choreo={choreo} progress={progress} />
         <Preload all />
-        <AdaptiveDpr pixelated />
+        <AdaptiveDpr />
       </Canvas>
     </motion.div>
   );
