@@ -1,10 +1,17 @@
+import { useQuery } from "@tanstack/react-query";
 import { Redirect, Tabs } from "expo-router";
-import { LayoutDashboard, Smartphone } from "lucide-react-native";
+import { Bell, LayoutDashboard, Smartphone } from "lucide-react-native";
 import { ActivityIndicator, View } from "react-native";
 import { useSession } from "../../lib/auth-client";
+import { notificationsQueryOptions } from "../../queries/notifications.queries";
 
 export default function TabsLayout() {
   const { isInitialPending, isAuthenticated } = useSession();
+  const { data: notifications } = useQuery({
+    ...notificationsQueryOptions({ query: { pageSize: "50" } }),
+    enabled: isAuthenticated,
+  });
+  const unread = notifications?.meta.unread ?? 0;
 
   if (isInitialPending) {
     return (
@@ -45,6 +52,15 @@ export default function TabsLayout() {
           tabBarIcon: ({ color, size }) => (
             <LayoutDashboard color={color} size={size} />
           ),
+        }}
+      />
+      <Tabs.Screen
+        name="notifications"
+        options={{
+          title: "Alerts",
+          tabBarIcon: ({ color, size }) => <Bell color={color} size={size} />,
+          tabBarBadge: unread > 0 ? (unread > 99 ? "99+" : unread) : undefined,
+          tabBarBadgeStyle: { backgroundColor: "#00DE6F", color: "#181818" },
         }}
       />
     </Tabs>
