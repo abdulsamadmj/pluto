@@ -158,9 +158,11 @@ function PhoneModel({
 export default function Phone3D({
   choreo,
   progress,
+  active = true,
 }: {
   choreo: PhoneChoreography;
   progress: MotionValue<number>;
+  active?: boolean;
 }) {
   // This component only mounts once the lazy chunk + model are loaded (the
   // Suspense boundary lives in Phone3DStage), so fading the container here
@@ -178,6 +180,9 @@ export default function Phone3D({
         camera={{ position: [0, 0, 10], fov: 35 }}
         // Let R3F drop resolution under load, then recover when idle.
         performance={{ min: 0.5 }}
+        // Freeze the render loop once the phone has faded out so the canvas
+        // stops competing for frames with the rest of the page's animations.
+        frameloop={active ? "always" : "never"}
         style={{ width: "100%", height: "100%" }}
       >
         <ambientLight intensity={0.7} />
