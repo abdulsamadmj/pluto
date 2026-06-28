@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Implementation Plan — Warranty &amp; Device Tracker (Reno Stack)</title>
+<style>
+  :root{
+    --bg:#0d1117; --panel:#161b22; --panel-2:#1c2330; --border:#2a3340;
+    --text:#e6edf3; --muted:#9aa7b4; --accent:#4f8cff; --accent-2:#22c55e;
+    --warn:#f59e0b; --danger:#ef4444; --violet:#a78bfa;
+    --radius:14px; --maxw:1080px;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0; background:linear-gradient(180deg,#0b0f14,#0d1117 40%);
+    color:var(--text);
+    font:16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  a{color:var(--accent);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 22px}
+
+  /* Header */
+  header.hero{
+    padding:64px 0 40px;border-bottom:1px solid var(--border);
+    background:radial-gradient(1200px 400px at 20% -10%,rgba(79,140,255,.18),transparent),
+               radial-gradient(900px 300px at 90% 0%,rgba(167,139,250,.14),transparent);
+  }
+  .badge{display:inline-block;font-size:13px;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--accent);border:1px solid var(--border);background:var(--panel);
+    padding:6px 12px;border-radius:999px;margin-bottom:18px}
+  h1{font-size:clamp(28px,5vw,46px);line-height:1.1;margin:0 0 14px;font-weight:800;letter-spacing:-.02em}
+  .sub{font-size:18px;color:var(--muted);max-width:760px}
+  .meta{display:flex;flex-wrap:wrap;gap:10px;margin-top:24px}
+  .pill{font-size:13px;color:var(--text);background:var(--panel);border:1px solid var(--border);
+    padding:8px 14px;border-radius:10px}
+  .pill b{color:var(--accent-2)}
+
+  /* TOC */
+  nav.toc{position:sticky;top:0;z-index:5;background:rgba(13,17,23,.85);
+    backdrop-filter:blur(10px);border-bottom:1px solid var(--border);padding:12px 0}
+  nav.toc .wrap{display:flex;gap:8px;flex-wrap:wrap}
+  nav.toc a{font-size:13.5px;color:var(--muted);padding:6px 12px;border-radius:8px;border:1px solid transparent}
+  nav.toc a:hover{color:var(--text);background:var(--panel);border-color:var(--border);text-decoration:none}
+
+  section{padding:48px 0;border-bottom:1px solid var(--border)}
+  h2{font-size:26px;margin:0 0 6px;font-weight:700;letter-spacing:-.01em;display:flex;align-items:center;gap:12px}
+  h2 .n{font-size:14px;color:var(--accent);border:1px solid var(--border);background:var(--panel);
+    width:34px;height:34px;display:grid;place-items:center;border-radius:9px;flex:none;font-weight:700}
+  h3{font-size:18px;margin:28px 0 10px;color:#fff}
+  .lead{color:var(--muted);margin:0 0 8px;max-width:820px}
+  p{margin:10px 0}
+
+  .grid{display:grid;gap:16px}
+  .g2{grid-template-columns:repeat(2,1fr)}
+  .g3{grid-template-columns:repeat(3,1fr)}
+  .g4{grid-template-columns:repeat(4,1fr)}
+  @media(max-width:860px){.g2,.g3,.g4{grid-template-columns:1fr}}
+
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:20px}
+  .card h4{margin:0 0 8px;font-size:16px;color:#fff;display:flex;align-items:center;gap:8px}
+  .card p{margin:6px 0;color:var(--muted);font-size:14.5px}
+  .card .ico{font-size:20px}
+
+  ul.clean{list-style:none;padding:0;margin:10px 0}
+  ul.clean li{padding:8px 0 8px 28px;position:relative;color:var(--muted);border-bottom:1px dashed rgba(255,255,255,.05)}
+  ul.clean li:last-child{border-bottom:none}
+  ul.clean li::before{content:"▹";position:absolute;left:6px;color:var(--accent)}
+  ul.clean li b{color:var(--text)}
+
+  .tag{display:inline-block;font-size:12px;padding:3px 9px;border-radius:7px;margin:2px 4px 2px 0;
+    background:var(--panel-2);border:1px solid var(--border);color:var(--text)}
+  .tag.f{color:#7fb0ff}.tag.b{color:#86efac}.tag.t{color:#fcd34d}
+
+  table{width:100%;border-collapse:collapse;margin:14px 0;font-size:14px;display:block;overflow-x:auto}
+  th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--border);white-space:nowrap}
+  th{color:var(--muted);font-weight:600;font-size:12.5px;text-transform:uppercase;letter-spacing:.04em}
+  td code{color:#7fb0ff}
+  tbody tr:hover{background:rgba(255,255,255,.02)}
+
+  pre{background:#0b0f14;border:1px solid var(--border);border-radius:12px;padding:16px;overflow-x:auto;
+    font:13px/1.55 "SF Mono",Menlo,Consolas,monospace;color:#cbd5e1;margin:14px 0}
+  code{font-family:"SF Mono",Menlo,Consolas,monospace}
+  .inline{background:var(--panel-2);border:1px solid var(--border);padding:2px 7px;border-radius:6px;font-size:13px;color:#7fb0ff}
+
+  .status{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;padding:4px 10px;border-radius:999px}
+  .s-active{background:rgba(34,197,94,.12);color:#4ade80;border:1px solid rgba(34,197,94,.3)}
+  .s-soon{background:rgba(245,158,11,.12);color:#fbbf24;border:1px solid rgba(245,158,11,.3)}
+  .s-exp{background:rgba(239,68,68,.12);color:#f87171;border:1px solid rgba(239,68,68,.3)}
+
+  /* Timeline */
+  .timeline{position:relative;margin:20px 0;padding-left:34px}
+  .timeline::before{content:"";position:absolute;left:11px;top:6px;bottom:6px;width:2px;background:var(--border)}
+  .day{position:relative;margin-bottom:18px}
+  .day::before{content:"";position:absolute;left:-28px;top:5px;width:14px;height:14px;border-radius:50%;
+    background:var(--accent);border:3px solid var(--bg);box-shadow:0 0 0 2px var(--accent)}
+  .day h4{margin:0 0 4px;color:#fff;font-size:16px}
+  .day .label{font-size:12px;color:var(--accent);text-transform:uppercase;letter-spacing:.06em;font-weight:700}
+  .day p{margin:4px 0;color:var(--muted);font-size:14.5px}
+
+  .checklist{list-style:none;padding:0;margin:0}
+  .checklist li{padding:10px 14px;background:var(--panel);border:1px solid var(--border);border-radius:10px;
+    margin-bottom:8px;color:var(--muted);display:flex;gap:10px;align-items:flex-start}
+  .checklist li b{color:var(--text)}
+  .checklist .box{color:var(--accent);flex:none}
+
+  .callout{background:linear-gradient(180deg,rgba(79,140,255,.08),transparent);
+    border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:10px;padding:14px 18px;margin:18px 0}
+  .callout.warn{border-left-color:var(--warn);background:linear-gradient(180deg,rgba(245,158,11,.08),transparent)}
+  .callout.flow{border-left-color:var(--violet);background:linear-gradient(180deg,rgba(167,139,250,.10),transparent)}
+  .callout b{color:#fff}
+
+  footer{padding:40px 0;color:var(--muted);font-size:13.5px;text-align:center}
+  .muted{color:var(--muted)}
+  hr{border:none;border-top:1px solid var(--border);margin:24px 0}
+
+  .flowsteps{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:14px 0}
+  .flowsteps .step{background:var(--panel);border:1px solid var(--border);border-radius:9px;padding:8px 12px;font-size:13px}
+  .flowsteps .arrow{color:var(--violet);font-weight:700}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <span class="badge">Full-Stack Interview Assignment · Reno Stack · End-to-End Type-Safe</span>
+    <h1>Warranty &amp; Device Tracker</h1>
+    <p class="sub">A web application that helps users catalog electronic devices, track warranty coverage,
+    and get ahead of upcoming expirations — built on the <b>Reno Stack</b> for full end-to-end type safety
+    from database to UI.</p>
+    <div class="meta">
+      <span class="pill">⏱ Deadline: <b>5 days</b></span>
+      <span class="pill">🦕 Stack: <b>Reno (Vite · Hono · Drizzle · Better-Auth)</b></span>
+      <span class="pill">🔒 Type safety: <b>DB → API → Client</b></span>
+      <span class="pill">📦 Deliverables: <b>Repo · Live URL · Video · README</b></span>
+    </div>
+  </div>
+</header>
+
+<nav class="toc">
+  <div class="wrap">
+    <a href="#overview">Overview</a>
+    <a href="#stack">Reno Stack</a>
+    <a href="#typesafety">Type Safety</a>
+    <a href="#architecture">Architecture</a>
+    <a href="#data">Schema</a>
+    <a href="#landing">Landing</a>
+    <a href="#auth">Auth</a>
+    <a href="#dashboard">Dashboard</a>
+    <a href="#details">Details</a>
+    <a href="#api">API / Hono</a>
+    <a href="#timeline">5-Day Plan</a>
+    <a href="#deploy">Deploy &amp; Submit</a>
+  </div>
+</nav>
+
+<!-- OVERVIEW -->
+<section id="overview">
+  <div class="wrap">
+    <h2><span class="n">0</span> Project Overview</h2>
+    <p class="lead">The goal is to build a polished, responsive full-stack product on the <b>Reno Stack</b>
+    — a modern starter that decouples a Vite/React front-end from a Hono back-end and connects them with
+    <b>type-safe RPC</b>. Auth may be mocked, and dummy data is acceptable, so emphasis stays on UX quality,
+    clean architecture, complete data-handling (search/filter/sort/pagination), and a single shared type
+    surface across the whole app.</p>
+
+    <div class="grid g3" style="margin-top:18px">
+      <div class="card"><h4><span class="ico">🛬</span> Marketing</h4><p>A landing page that sells the product: hero, features, stats, and a call-to-action.</p></div>
+      <div class="card"><h4><span class="ico">🔐</span> Auth Flow</h4><p>Sign in, sign up, forgot &amp; reset password via <b>Better-Auth</b> (or mocked).</p></div>
+      <div class="card"><h4><span class="ico">📊</span> Dashboard</h4><p>Metric cards plus a feature-rich device table with all data-handling controls.</p></div>
+      <div class="card"><h4><span class="ico">🔎</span> Details</h4><p>A rich device profile with warranty timeline and notes (route or side panel).</p></div>
+      <div class="card"><h4><span class="ico">🛠</span> API</h4><p>Hono routes serving device lists &amp; details, consumed through Hono RPC client.</p></div>
+      <div class="card"><h4><span class="ico">🚀</span> Ship</h4><p>Deployed live, recorded demo, and a README explaining setup and decisions.</p></div>
+    </div>
+
+    <div class="callout">
+      <b>Why Reno fits this brief.</b> The assignment explicitly wants device <i>listings</i> and <i>details</i>
+      endpoints with server-side data handling — exactly the shape Reno's Hono-RPC + React Query layer was
+      built for. SEO doesn't matter here (it's an authed app behind a marketing page), which is precisely the
+      trade-off Reno optimizes for: speed and simplicity over SSR/SEO.
+    </div>
+  </div>
+</section>
+
+<!-- STACK -->
+<section id="stack">
+  <div class="wrap">
+    <h2><span class="n">1</span> The Reno Stack</h2>
+    <p class="lead">A pnpm monorepo that pairs a React/Vite SPA with a Hono server, wired together by type-safe
+    RPC. Reference: <a href="https://github.com/reno-stack/reno-stack">github.com/reno-stack/reno-stack</a>.</p>
+
+    <div class="grid g3">
+      <div class="card">
+        <h4>Front-End (apps/web)</h4>
+        <span class="tag f">React + Vite</span>
+        <span class="tag f">TanStack Router (file-based)</span>
+        <span class="tag f">TanStack Query</span>
+        <span class="tag f">Tailwind CSS</span>
+        <span class="tag f">Shadcn UI</span>
+        <span class="tag f">Hono RPC client</span>
+        <p>File-based routing, Shadcn components added via <span class="inline">pnpm ui-add</span>, and React
+        Query bound to the API through Reno's Hono helpers.</p>
+      </div>
+      <div class="card">
+        <h4>Back-End (apps/server)</h4>
+        <span class="tag b">Hono</span>
+        <span class="tag b">Drizzle ORM</span>
+        <span class="tag b">PostgreSQL</span>
+        <span class="tag b">Better-Auth</span>
+        <span class="tag b">Zod</span>
+        <p>Hono routes generated with <span class="inline">pnpm create:route</span>; Drizzle schema pushed
+        with <span class="inline">pnpm db:push</span>; Better-Auth handles sessions.</p>
+      </div>
+      <div class="card">
+        <h4>Shared (packages/*)</h4>
+        <span class="tag t">packages/validators</span>
+        <span class="tag t">packages/ui</span>
+        <span class="tag t">Zod schemas</span>
+        <span class="tag t">TypeScript everywhere</span>
+        <span class="tag t">pnpm workspaces</span>
+        <p>One source of truth for Zod validators and shared Shadcn UI, imported by both apps — no type
+        duplication across the boundary.</p>
+      </div>
+    </div>
+
+    <h3>Setup commands (from the Reno README)</h3>
+    <table>
+      <thead><tr><th>Command</th><th>Purpose</th></tr></thead>
+      <tbody>
+        <tr><td><code>pnpm i</code></td><td>Install all workspace dependencies</td></tr>
+        <tr><td><code>cp .env.example .env</code></td><td>Configure environment (DB URL, auth secrets)</td></tr>
+        <tr><td><code>pnpm db:push</code></td><td>Apply the Drizzle schema to Postgres</td></tr>
+        <tr><td><code>pnpm create:route &lt;name&gt;</code></td><td>Scaffold a new type-safe Hono server route</td></tr>
+        <tr><td><code>pnpm ui-add &lt;name&gt;</code></td><td>Add a Shadcn UI component to packages/ui</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout warn">
+      <b>Postgres needed.</b> Reno uses Drizzle + Postgres rather than in-memory data. For the assignment's
+      "dummy data is fine" allowance, run Postgres locally (Docker) or use a free hosted DB (Neon/Supabase)
+      and <b>seed it</b> with a script (see §4). This keeps the type-safe Drizzle layer intact instead of
+      bypassing it with an array.
+    </div>
+  </div>
+</section>
+
+<!-- TYPE SAFETY -->
+<section id="typesafety">
+  <div class="wrap">
+    <h2><span class="n">2</span> End-to-End Type Safety — the core of this plan</h2>
+    <p class="lead">Reno's whole point is that a type defined once flows unbroken from the database to the
+    rendered table cell. There is no hand-written API client and no DTO drift.</p>
+
+    <div class="callout flow">
+      <div class="flowsteps">
+        <span class="step">🗄 Drizzle schema</span><span class="arrow">→</span>
+        <span class="step">🧬 Inferred row types</span><span class="arrow">→</span>
+        <span class="step">✅ Zod validators (packages/validators)</span><span class="arrow">→</span>
+        <span class="step">🚦 Hono route + RPC</span><span class="arrow">→</span>
+        <span class="step">🔗 Typed client (hc)</span><span class="arrow">→</span>
+        <span class="step">⚛️ React Query hook</span><span class="arrow">→</span>
+        <span class="step">🖥 UI</span>
+      </div>
+      A change to a column or query param surfaces as a TypeScript error at every consuming call site —
+      compile-time, not runtime.
+    </div>
+
+    <h3>How the link is made</h3>
+    <ul class="clean">
+      <li><b>Drizzle infers row types</b> — <span class="inline">InferSelectModel&lt;typeof devices&gt;</span> gives the canonical <span class="inline">Device</span> type straight from the table definition.</li>
+      <li><b>Zod validators are shared</b> — query params (search/filter/sort/page) and bodies live in <span class="inline">packages/validators</span>, imported by both the Hono route (to validate) and the web app (to type forms).</li>
+      <li><b>Hono RPC exports the app type</b> — <span class="inline">export type AppType = typeof app</span>; the client is built with <span class="inline">hc&lt;AppType&gt;(baseUrl)</span>, so request shapes and response JSON are fully typed.</li>
+      <li><b>Reno's React Query helpers</b> — <span class="inline">createHonoQueryOptions</span> and <span class="inline">createHonoMutationOptions</span> wrap the RPC client so hooks like <span class="inline">useDevices()</span> infer <code>data</code>, <code>params</code>, and errors automatically.</li>
+    </ul>
+
+    <h3>Illustrative wiring</h3>
+<pre>// packages/validators/devices.ts  — single source of truth
+export const deviceQuerySchema = z.object({
+  search:   z.string().optional(),
+  status:   z.enum(["active","expiring_soon","expired"]).optional(),
+  brand:    z.string().optional(),
+  sort:     z.enum(["name","purchaseDate","warrantyExpiry","status"]).default("warrantyExpiry"),
+  order:    z.enum(["asc","desc"]).default("asc"),
+  page:     z.coerce.number().int().min(1).default(1),
+  pageSize: z.coerce.number().int().min(1).max(100).default(10),
+});
+export type DeviceQuery = z.infer&lt;typeof deviceQuerySchema&gt;;
+
+// apps/server/src/routes/devices.ts  — Hono route, validated + typed
+const route = new Hono()
+  .get("/", zValidator("query", deviceQuerySchema), async (c) =&gt; {
+    const params = c.req.valid("query");          // DeviceQuery, typed
+    const result = await listDevices(params);     // Drizzle query
+    return c.json(result);                         // { data: Device[], meta }
+  })
+  .get("/:id", async (c) =&gt; c.json(await getDevice(c.req.param("id"))));
+export type DevicesType = typeof route;
+
+// apps/web/src/features/devices/queries.ts  — typed client + hook
+export const devicesQuery = (params: DeviceQuery) =&gt;
+  createHonoQueryOptions(client.api.devices.$get, { query: params });
+//  ⤷ data is inferred as { data: Device[]; meta: PageMeta } — no manual typing</pre>
+
+    <div class="callout"><b>Payoff for the demo.</b> Rename <code>warrantyExpiry</code> in the Drizzle schema and
+    the table column, the sort enum, and the API all light up red until fixed. That's a strong, concrete story
+    to narrate in the submission video.</div>
+  </div>
+</section>
+
+<!-- ARCHITECTURE -->
+<section id="architecture">
+  <div class="wrap">
+    <h2><span class="n">3</span> Architecture &amp; Repo Layout</h2>
+    <p class="lead">Reno's monorepo separates the two apps and shares validators + UI through packages.</p>
+<pre>warranty-tracker/                # forked / cloned from reno-stack
+├── README.md
+├── pnpm-workspace.yaml
+├── package.json
+├── apps/
+│   ├── server/                  # Hono + Drizzle + Better-Auth
+│   │   ├── src/
+│   │   │   ├── index.ts             # Hono app, exports AppType
+│   │   │   ├── routes/
+│   │   │   │   ├── devices.ts       # list + details (pnpm create:route)
+│   │   │   │   ├── stats.ts         # dashboard metrics
+│   │   │   │   └── meta.ts          # distinct brands/categories
+│   │   │   ├── db/
+│   │   │   │   ├── schema.ts        # Drizzle tables (devices, events)
+│   │   │   │   └── seed.ts          # Faker → insert dummy data
+│   │   │   ├── services/devices.ts  # search/filter/sort/paginate
+│   │   │   └── auth.ts              # Better-Auth config
+│   │   └── drizzle.config.ts
+│   └── web/                     # React + Vite + TanStack Router
+│       ├── src/
+│       │   ├── routes/              # file-based: /, /sign-in, /dashboard, /devices/$id
+│       │   ├── features/devices/    # queries, hooks, columns
+│       │   ├── components/          # table/, charts/, layout/
+│       │   ├── lib/                 # hono client (hc), formatters, warranty utils
+│       │   └── main.tsx
+│       └── vite.config.ts
+└── packages/
+    ├── ui/                      # Shadcn components (pnpm ui-add)
+    └── validators/             # shared Zod schemas + inferred types</pre>
+
+    <h3>Data flow</h3>
+    <ul class="clean">
+      <li><b>Route component</b> → calls a typed hook (<span class="inline">useQuery(devicesQuery(params))</span>)</li>
+      <li><b>Hono RPC client</b> → typed request to the Hono server; TanStack Query caches by key, exposes <i>isPending / isError / data</i></li>
+      <li><b>Hono route</b> → Zod-validates query, runs the Drizzle search→filter→sort→paginate pipeline, returns <code>{ data, meta }</code></li>
+      <li><b>UI</b> → skeletons / empty / table; table state lives in TanStack Router search params so views are shareable</li>
+    </ul>
+  </div>
+</section>
+
+<!-- DATA MODEL -->
+<section id="data">
+  <div class="wrap">
+    <h2><span class="n">4</span> Drizzle Schema &amp; Seed</h2>
+    <p class="lead">A single core entity — the device — plus warranty events, with status derived from dates.</p>
+<pre>// apps/server/src/db/schema.ts
+export const devices = pgTable("devices", {
+  id:             uuid("id").primaryKey().defaultRandom(),
+  name:           text("name").notNull(),
+  brand:          text("brand").notNull(),
+  category:       text("category").notNull(),
+  model:          text("model").notNull(),
+  serialNumber:   text("serial_number").notNull(),
+  purchaseDate:   timestamp("purchase_date").notNull(),
+  purchasePrice:  integer("purchase_price").notNull(),
+  retailer:       text("retailer").notNull(),
+  warrantyMonths: integer("warranty_months").notNull(),
+  warrantyExpiry: timestamp("warranty_expiry").notNull(),  // stored, kept in sync
+  notes:          text("notes").default(""),
+  createdAt:      timestamp("created_at").defaultNow(),
+});
+
+export const warrantyEvents = pgTable("warranty_events", {
+  id:          uuid("id").primaryKey().defaultRandom(),
+  deviceId:    uuid("device_id").references(() =&gt; devices.id).notNull(),
+  date:        timestamp("date").notNull(),
+  type:        text("type").notNull(),   // purchase|registered|claim|repair|extended|expired
+  title:       text("title").notNull(),
+  description: text("description"),
+});
+
+export type Device = InferSelectModel&lt;typeof devices&gt;;        // ← used everywhere
+export type WarrantyEvent = InferSelectModel&lt;typeof warrantyEvents&gt;;</pre>
+
+    <h3>Status derivation rule (shared helper)</h3>
+    <table>
+      <thead><tr><th>Condition</th><th>Status</th><th>Badge</th></tr></thead>
+      <tbody>
+        <tr><td><code>expiry &lt; today</code></td><td>expired</td><td><span class="status s-exp">● Expired</span></td></tr>
+        <tr><td><code>0 ≤ daysLeft ≤ 30</code></td><td>expiring_soon</td><td><span class="status s-soon">● Expiring soon</span></td></tr>
+        <tr><td><code>daysLeft &gt; 30</code></td><td>active</td><td><span class="status s-active">● Active</span></td></tr>
+      </tbody>
+    </table>
+    <p class="muted">Status is computed (not stored) by a helper in <b>packages/validators</b> so the table,
+    the dashboard metrics, and the details view share one definition. The 30-day window powers the
+    <b>Expiring Soon</b> metric. Seed ~250 devices with Faker via <span class="inline">pnpm db:seed</span>.</p>
+  </div>
+</section>
+
+<!-- LANDING -->
+<section id="landing">
+  <div class="wrap">
+    <h2><span class="n">5</span> Landing Page</h2>
+    <p class="lead">A marketing route (<span class="inline">/</span>) communicating the value of one place for
+    devices and warranties. Built from Shadcn primitives + Tailwind.</p>
+    <div class="grid g2">
+      <div class="card"><h4>🎬 Hero section</h4><p>Headline, value prop, primary CTA ("Get started") + secondary ("See demo"), product mockup. Gradient background.</p></div>
+      <div class="card"><h4>✨ Features section</h4><p>3–6 Shadcn cards: centralized tracking, expiry reminders, warranty timeline, search &amp; filter, notes, categories.</p></div>
+      <div class="card"><h4>📈 Statistics section</h4><p>Animated counters — devices tracked, warranties monitored, on-time renewals — for credibility.</p></div>
+      <div class="card"><h4>📣 Call-to-action</h4><p>Closing banner driving to Sign Up + footer. Sticky transparent navbar with Sign In / Sign Up.</p></div>
+    </div>
+    <ul class="clean">
+      <li><b>Responsive first</b> — mobile single-column → desktop multi-column via Tailwind breakpoints.</li>
+      <li><b>Reuse packages/ui</b> — Button, Card, Container come from the shared Shadcn package.</li>
+      <li><b>Public route</b> — lives outside the auth guard in TanStack Router's file tree.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- AUTH -->
+<section id="auth">
+  <div class="wrap">
+    <h2><span class="n">6</span> Authentication (Better-Auth)</h2>
+    <p class="lead">Reno ships with <b>Better-Auth</b>, so you get real, type-safe sessions instead of a hand-rolled
+    mock — four screens with validated forms.</p>
+    <div class="grid g4">
+      <div class="card"><h4>Sign In</h4><p>Email + password via Better-Auth client, "remember me", forgot link, redirect to dashboard.</p></div>
+      <div class="card"><h4>Sign Up</h4><p>Name, email, password + confirm, terms. Strength meter + inline errors.</p></div>
+      <div class="card"><h4>Forgot Password</h4><p>Email → success confirmation ("If an account exists, we sent a link").</p></div>
+      <div class="card"><h4>Reset Password</h4><p>New password + confirm using token from URL → back to sign in.</p></div>
+    </div>
+
+    <h3>Validation &amp; guarding</h3>
+    <ul class="clean">
+      <li><b>Schema-driven</b> — Zod schemas in <span class="inline">packages/validators</span> wired through React Hook Form for field + submit errors.</li>
+      <li><b>States covered</b> — invalid email, weak/short password, mismatched confirm, required fields, submit loading, server error ("Invalid credentials").</li>
+      <li><b>Better-Auth</b> — provides the session, typed <span class="inline">useSession()</span>, and server middleware to protect Hono routes.</li>
+      <li><b>Route guard</b> — TanStack Router <span class="inline">beforeLoad</span> redirects unauthenticated users away from <span class="inline">/dashboard</span> and <span class="inline">/devices/*</span>.</li>
+      <li><b>Mock fallback</b> — if you'd rather not run real auth, the brief allows mocking: stub the Better-Auth client to accept any credentials and short-circuit the guard.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- DASHBOARD -->
+<section id="dashboard">
+  <div class="wrap">
+    <h2><span class="n">7</span> Dashboard</h2>
+    <p class="lead">The core working surface: summary metrics on top, a fully-featured device table below.</p>
+
+    <h3>Summary metric cards — <span class="inline">GET /api/stats</span></h3>
+    <div class="grid g4">
+      <div class="card"><h4>📱 Total Devices</h4><p>Count of all devices.</p></div>
+      <div class="card"><h4 style="color:#4ade80">🟢 Active Warranties</h4><p>Status = active.</p></div>
+      <div class="card"><h4 style="color:#fbbf24">🟠 Expiring Soon</h4><p>Within 30 days.</p></div>
+      <div class="card"><h4 style="color:#f87171">🔴 Expired</h4><p>Past expiry date.</p></div>
+    </div>
+
+    <h3>Device table (Shadcn + TanStack Table)</h3>
+    <table>
+      <thead><tr><th>Device Name</th><th>Brand</th><th>Purchase Date</th><th>Warranty Expiry</th><th>Status</th><th>Actions</th></tr></thead>
+      <tbody>
+        <tr><td>MacBook Pro 16"</td><td>Apple</td><td>2024-03-12</td><td>2027-03-12</td><td><span class="status s-active">● Active</span></td><td><a href="#">View</a></td></tr>
+        <tr><td>Galaxy S23</td><td>Samsung</td><td>2023-08-01</td><td>2026-07-10</td><td><span class="status s-soon">● Expiring soon</span></td><td><a href="#">View</a></td></tr>
+        <tr><td>Bravia X90L</td><td>Sony</td><td>2022-01-20</td><td>2025-01-20</td><td><span class="status s-exp">● Expired</span></td><td><a href="#">View</a></td></tr>
+      </tbody>
+    </table>
+
+    <h3>Required functionality (all server-side via Hono RPC)</h3>
+    <div class="grid g3">
+      <div class="card"><h4>🔍 Search</h4><p>Debounced text search across name, brand, model, serial → <code>?search=</code>.</p></div>
+      <div class="card"><h4>🧫 Filtering</h4><p>By status &amp; brand/category via Shadcn selects → <code>?status=&amp;brand=</code>.</p></div>
+      <div class="card"><h4>↕ Sorting</h4><p>Click column headers → <code>?sort=&amp;order=</code>, validated by the shared enum.</p></div>
+      <div class="card"><h4>📄 Pagination</h4><p>Page + page-size, server-driven → <code>?page=&amp;pageSize=</code>, totals in <code>meta</code>.</p></div>
+      <div class="card"><h4>⏳ Loading states</h4><p><code>isPending</code> → skeleton rows, disabled controls, no layout shift.</p></div>
+      <div class="card"><h4>📭 Empty states</h4><p>Friendly "no devices match" with clear-filters; distinct from zero-devices.</p></div>
+    </div>
+    <div class="callout"><b>State in router search params.</b> Persist search/filter/sort/page in TanStack Router's
+    typed search params so the view is shareable, survives refresh, and feeds the React Query key for free caching.</div>
+  </div>
+</section>
+
+<!-- DETAILS -->
+<section id="details">
+  <div class="wrap">
+    <h2><span class="n">8</span> Device Details</h2>
+    <p class="lead">A rich profile for a single device at <span class="inline">/devices/$id</span> (with a side-panel option),
+    fed by <code>GET /api/devices/:id</code>.</p>
+    <div class="grid g2">
+      <div class="card"><h4>🏷 Device &amp; Brand info</h4><p>Name, brand, category, model, serial number, category icon.</p></div>
+      <div class="card"><h4>🧾 Purchase details</h4><p>Purchase date, price, retailer, receipt reference.</p></div>
+      <div class="card"><h4>🛡 Warranty details</h4><p>Coverage length, terms, provider, computed expiry date.</p></div>
+      <div class="card"><h4>⏰ Expiry information</h4><p>Status badge + "days remaining" countdown and coverage-used progress bar.</p></div>
+      <div class="card"><h4>🧭 Warranty timeline/history</h4><p>Vertical timeline from <code>warranty_events</code>: purchase → registered → claims/repairs → expiry.</p></div>
+      <div class="card"><h4>📝 Notes section</h4><p>Editable notes saved via a typed Hono mutation (<span class="inline">createHonoMutationOptions</span>).</p></div>
+    </div>
+    <ul class="clean">
+      <li><b>File-based route</b> — <span class="inline">routes/devices.$id.tsx</span>; deep-linkable, with a loader prefetch.</li>
+      <li><b>Optional side panel</b> — Shadcn Sheet drawer from the table "View" action, with an "open full page" link.</li>
+      <li><b>States</b> — loading skeleton, 404 not-found, and error fallback.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- API -->
+<section id="api">
+  <div class="wrap">
+    <h2><span class="n">9</span> Back-End / API Layer (Hono)</h2>
+    <p class="lead">Hono routes serving device data with all data-handling done server-side in Drizzle. Generate
+    each with <span class="inline">pnpm create:route</span>.</p>
+
+    <h3>Endpoints</h3>
+    <table>
+      <thead><tr><th>Method</th><th>Path</th><th>Purpose</th></tr></thead>
+      <tbody>
+        <tr><td><code>GET</code></td><td><code>/api/devices</code></td><td>Paginated list with search, filter, sort</td></tr>
+        <tr><td><code>GET</code></td><td><code>/api/devices/:id</code></td><td>Full device profile incl. timeline &amp; notes</td></tr>
+        <tr><td><code>PATCH</code></td><td><code>/api/devices/:id/notes</code></td><td>Update notes (typed mutation)</td></tr>
+        <tr><td><code>GET</code></td><td><code>/api/stats</code></td><td>Summary metrics for dashboard cards</td></tr>
+        <tr><td><code>GET</code></td><td><code>/api/meta</code></td><td>Distinct brands/categories for filter dropdowns</td></tr>
+        <tr><td><code>GET</code></td><td><code>/health</code></td><td>Health check for deployment</td></tr>
+      </tbody>
+    </table>
+
+    <h3>List query contract</h3>
+<pre>GET /api/devices
+  ?search=macbook        // matches name, brand, model, serial
+  &amp;status=active         // active | expiring_soon | expired
+  &amp;brand=Apple
+  &amp;sort=warrantyExpiry   // name | purchaseDate | warrantyExpiry | status
+  &amp;order=asc             // asc | desc
+  &amp;page=1
+  &amp;pageSize=10
+
+Response:  { "data": Device[], "meta": { page, pageSize, total, totalPages } }
+// validated by deviceQuerySchema; response type inferred by the Hono RPC client</pre>
+
+    <h3>Drizzle service pipeline (order matters)</h3>
+    <ul class="clean">
+      <li><b>1 · Search</b> — <span class="inline">ilike</span> across indexed text columns (name, brand, model, serial).</li>
+      <li><b>2 · Filter</b> — <span class="inline">where</span> by status (computed range on expiry) and brand/category.</li>
+      <li><b>3 · Sort</b> — <span class="inline">orderBy</span> requested column + direction, stable secondary key (id).</li>
+      <li><b>4 · Paginate</b> — <span class="inline">limit</span>/<span class="inline">offset</span>; <span class="inline">count()</span> the filtered set for <code>meta</code>.</li>
+    </ul>
+    <ul class="clean">
+      <li><b>Validation</b> — <span class="inline">zValidator("query", deviceQuerySchema)</span> coerces &amp; bounds params (pageSize ≤ 100), 400 on bad input.</li>
+      <li><b>Errors</b> — Hono <span class="inline">onError</span> returns <code>{ error: { message, code } }</code>; 404 for unknown ids.</li>
+      <li><b>Seed</b> — <span class="inline">pnpm db:seed</span> inserts ~250 Faker devices + timelines so demos look real.</li>
+      <li><b>CORS</b> — Hono CORS middleware scoped to the web origin; Better-Auth middleware protects device routes.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- TIMELINE -->
+<section id="timeline">
+  <div class="wrap">
+    <h2><span class="n">10</span> 5-Day Execution Plan</h2>
+    <p class="lead">Front-load Reno setup + schema + backend so the typed client exists before the UI is built.</p>
+    <div class="timeline">
+      <div class="day">
+        <span class="label">Day 1 · Foundation</span>
+        <h4>Clone Reno + DB + schema + backend</h4>
+        <p>Clone reno-stack, <code>pnpm i</code>, configure <code>.env</code>, start Postgres. Define the Drizzle
+        schema, <code>db:push</code>, write the seed. Build device list/details/stats/meta Hono routes with the
+        full Drizzle pipeline and shared Zod validators. Verify the typed RPC client compiles.</p>
+      </div>
+      <div class="day">
+        <span class="label">Day 2 · Marketing + Auth</span>
+        <h4>Landing page + Better-Auth screens</h4>
+        <p>Hero, features, stats, CTA, footer — responsive, from Shadcn. Wire the four Better-Auth screens with
+        Zod-validated forms and the TanStack Router guard.</p>
+      </div>
+      <div class="day">
+        <span class="label">Day 3 · Dashboard core</span>
+        <h4>Metrics + table + data handling</h4>
+        <p>Metric cards from <code>/api/stats</code>. Device table via Hono-RPC + React Query with router-synced
+        search/filter/sort/pagination, plus loading skeletons and empty states.</p>
+      </div>
+      <div class="day">
+        <span class="label">Day 4 · Details + polish</span>
+        <h4>Profile, timeline, notes mutation, responsive pass</h4>
+        <p>Details route + side-panel option, warranty timeline, countdown, editable notes (typed mutation).
+        Cross-device responsiveness/accessibility sweep and micro-interactions.</p>
+      </div>
+      <div class="day">
+        <span class="label">Day 5 · Ship</span>
+        <h4>Deploy, README, video, buffer</h4>
+        <p>Deploy server + web with env vars and a hosted Postgres. Write the README. Record the demo (call out
+        the end-to-end type-safety story). Keep half a day buffer for QA.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DEPLOY -->
+<section id="deploy">
+  <div class="wrap">
+    <h2><span class="n">11</span> Deployment &amp; Submission</h2>
+    <div class="grid g2">
+      <div>
+        <h3>Deployment</h3>
+        <ul class="clean">
+          <li><b>Database → Neon/Supabase</b> — free hosted Postgres; run <code>pnpm db:push</code> + seed against it.</li>
+          <li><b>Server (Hono) → Render/Railway/Fly</b> — Node runtime; expose <code>/health</code>; set DB + auth env vars; CORS to web origin.</li>
+          <li><b>Web (Vite) → Vercel/Netlify</b> — set the API base URL for the Hono client; SPA routing fallback.</li>
+          <li><b>Env hygiene</b> — keep <code>.env.example</code> committed; real secrets only in platform dashboards.</li>
+        </ul>
+      </div>
+      <div>
+        <h3>README must cover</h3>
+        <ul class="clean">
+          <li><b>What it is</b> + screenshots/GIF.</li>
+          <li><b>Reno stack</b> &amp; the type-safety flow diagram.</li>
+          <li><b>Local setup</b> — pnpm i, .env, db:push, db:seed, dev.</li>
+          <li><b>API docs</b> — endpoints &amp; query params.</li>
+          <li><b>Design decisions</b> &amp; trade-offs (SPA over SSR, etc.).</li>
+          <li><b>Live URL</b> + demo video link.</li>
+        </ul>
+      </div>
+    </div>
+
+    <h3>Final submission checklist</h3>
+    <ul class="checklist">
+      <li><span class="box">☐</span><span><b>GitHub repository</b> — clean history, meaningful commits, no secrets, README at root.</span></li>
+      <li><span class="box">☐</span><span><b>Live deployment URL</b> — web + Hono API + Postgres all reachable and working.</span></li>
+      <li><span class="box">☐</span><span><b>Working video demo</b> — 2–4 min: landing → auth → dashboard features → details, plus the type-safety highlight.</span></li>
+      <li><span class="box">☐</span><span><b>README</b> — setup instructions + implementation details complete.</span></li>
+    </ul>
+
+    <div class="callout">
+      <b>Scoring edge.</b> Reviewers notice the small things: empty/loading/error states everywhere, mobile
+      responsiveness, debounced search, router-synced URL state, consistent status logic, and — uniquely with
+      Reno — a single typed surface from Drizzle to the table. Demonstrate a rename rippling through the types
+      in the video; it's a memorable proof of the architecture.
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    Implementation plan for the Warranty &amp; Device Tracker assignment · built on the
+    <a href="https://github.com/reno-stack/reno-stack">Reno Stack</a> for end-to-end type safety ·
+    open this file in any browser.
+  </div>
+</footer>
+
+</body>
+</html>
