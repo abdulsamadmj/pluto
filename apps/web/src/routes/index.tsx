@@ -11,14 +11,24 @@ import { ChevronDown } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Chapter } from "../components/landing/Chapter";
 import { MobileAppSection } from "../components/landing/MobileAppSection";
+import { MobileLanding } from "../components/landing/MobileLanding";
 import { Phone3DStage } from "../components/landing/Phone3DStage";
 import { ScrollProgressRail } from "../components/landing/ScrollProgressRail";
+import { useMediaQuery } from "../lib/useMediaQuery";
 
 export const Route = createFileRoute("/")({
   component: LandingPage,
 });
 
 function LandingPage() {
+  // On small screens, skip the 3D + scroll storytelling entirely and show a
+  // single non-scrolling app-promo page.
+  const isDesktop = useMediaQuery("(min-width: 1024px)");
+  if (!isDesktop) return <MobileLanding />;
+  return <DesktopLanding />;
+}
+
+function DesktopLanding() {
   const pageRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
     target: pageRef,
@@ -35,17 +45,19 @@ function LandingPage() {
         <main className="relative z-10">
           <Hero />
 
+          {/* Text sits opposite the phone's scroll position (phone goes
+              left → text right, phone right → text left). */}
           <Chapter
             index="01"
             eyebrow="Catalog"
-            align="left"
+            align="right"
             title={<>Every device, in one place.</>}
             body="Laptops, phones, TVs, appliances — capture purchase details, serials, and receipts in a single organized catalog."
           />
           <Chapter
             index="02"
             eyebrow="Stay ahead"
-            align="right"
+            align="left"
             title={
               <>
                 Never miss an <em className="text-primary not-italic">expiry</em>.
@@ -56,7 +68,7 @@ function LandingPage() {
           <Chapter
             index="03"
             eyebrow="History"
-            align="left"
+            align="right"
             title={<>A full warranty timeline.</>}
             body="Track each device's lifecycle — purchase, registration, claims, repairs, and expiry — at a glance."
           />
@@ -110,16 +122,13 @@ function MarketingNav() {
 
 function Hero() {
   return (
-    <section className="relative flex min-h-screen flex-col items-center justify-between px-5 pb-12 pt-28 text-center">
+    <section className="relative flex min-h-screen flex-col items-center justify-between px-5 pb-12 pt-12 text-center">
       <motion.div
         initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
         className="mx-auto max-w-3xl"
       >
-        <span className="inline-block rounded-full border border-white/10 bg-white/5 px-4 py-1.5 font-mono text-xs uppercase tracking-[0.2em] text-primary">
-          Warranty &amp; Device Tracker
-        </span>
         <h1 className="mx-auto mt-6 max-w-3xl font-display text-6xl leading-[1.02] tracking-tight md:text-8xl">
           Never miss a{" "}
           <span className="bg-gradient-to-r from-primary via-purple-300 to-pink-300 bg-clip-text text-transparent">
@@ -135,11 +144,11 @@ function Hero() {
         transition={{ duration: 0.7, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
         className="mx-auto max-w-xl"
       >
-        <p className="text-lg text-zinc-400">
+        <p className="text-sm text-zinc-400">
           Catalog every device you own, track warranty coverage, and get ahead of
-          upcoming expirations — from web and mobile.
+          upcoming expirations.
         </p>
-        <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+        <div className="mt-4 flex flex-col items-center justify-center gap-3 sm:flex-row">
           <Button asChild size="lg">
             <Link to="/sign-up">Start tracking free</Link>
           </Button>
