@@ -11,6 +11,34 @@ useGLTF.preload(MODEL_URL);
 const CASE_COLOR = "#e879b9"; // Pluto magenta
 const TARGET_HEIGHT = 4.3; // world units the phone should occupy
 
+// Fraction of the device front the actual screen covers (leaves a thin bezel).
+const SCREEN_W_FRAC = 0.86;
+const SCREEN_H_FRAC = 0.9;
+
+/** Rounded-rectangle plane with UVs remapped to [0,1] for texturing. */
+function roundedPlane(w: number, h: number, r: number): THREE.ShapeGeometry {
+  const x = -w / 2;
+  const y = -h / 2;
+  const s = new THREE.Shape();
+  s.moveTo(x + r, y);
+  s.lineTo(x + w - r, y);
+  s.quadraticCurveTo(x + w, y, x + w, y + r);
+  s.lineTo(x + w, y + h - r);
+  s.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  s.lineTo(x + r, y + h);
+  s.quadraticCurveTo(x, y + h, x, y + h - r);
+  s.lineTo(x, y + r);
+  s.quadraticCurveTo(x, y, x + r, y);
+  const geo = new THREE.ShapeGeometry(s, 24);
+  const pos = geo.attributes.position;
+  const uv: number[] = [];
+  for (let i = 0; i < pos.count; i++) {
+    uv.push((pos.getX(i) - x) / w, (pos.getY(i) - y) / h);
+  }
+  geo.setAttribute("uv", new THREE.Float32BufferAttribute(uv, 2));
+  return geo;
+}
+
 // Portrait screens shown per scroll chapter, then the landscape app screen.
 const SCREEN_URLS = [
   "/screens/01-catalog.png",
@@ -64,12 +92,20 @@ function PhoneModel({
     wrap.scale.setScalar(scale);
     wrap.rotation.y = Math.PI;
 
-    // Screen overlay sized/placed against the front face (in world units).
-    const screen = {
-      w: size.x * scale * 0.9,
-      h: size.y * scale * 0.94,
-      z: (size.z * scale) / 2 + 0.02,
-    };
+    // Screen overlay sized/placed against the front face (in world units),
+    // inset to leave a thin bezel, with rounded corners + a Dynamic Island.
+    const w = size.x * scale * SCREEN_W_FRAC;
+    const h = size.y * scale * SCREEN_H_FRAC;
+    const z = (size.z * scale) / 2 + 0.015;
+    const screenGeo = roundedPlane(w, h, Math.min(w, h) * 0.11);
+
+    // Dynamic Island: a black pill near the top of the screen.
+    const islandW = w * 0.3;
+    const islandH = w * 0.075;
+    const islandGeo = roundedPlane(islandW, islandH, islandH / 2);
+    const islandY = h / 2 - islandH / 2 - h * 0.03;
+
+    const screen = { w, h, z, screenGeo, islandGeo, islandY };
     return { node: wrap, screen };
   }, [scene]);
 
@@ -104,10 +140,16 @@ function PhoneModel({
   return (
     <group ref={outer}>
       <primitive object={node} />
-      {/* Overlay screen — child of the same group so it rotates to landscape too */}
-      <mesh ref={screenRef} position={[0, 0, screen.z]}>
-        <planeGeometry args={[screen.w, screen.h]} />
+      {/* Rounded screen overlay — child of the group so it rotates to landscape too */}
+      <mesh ref={screenRef} geometry={screen.screenGeo} position={[0, 0, screen.z]}>
         <meshBasicMaterial ref={screenMat} toneMapped={false} />
+      </mesh>
+      {/* Dynamic Island */}
+      <mesh
+        geometry={screen.islandGeo}
+        position={[0, screen.islandY, screen.z + 0.004]}
+      >
+        <meshBasicMaterial color="#000000" toneMapped={false} />
       </mesh>
     </group>
   );
