@@ -1,6 +1,6 @@
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { AdaptiveDpr, Preload, useGLTF, useTexture } from "@react-three/drei";
-import { animate, type MotionValue, useMotionValue } from "framer-motion";
+import { type MotionValue } from "framer-motion";
 import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 import type { PhoneChoreography } from "./usePhoneChoreography";
@@ -49,11 +49,9 @@ const SCREEN_URLS = [
 function PhoneModel({
   choreo,
   progress,
-  reveal,
 }: {
   choreo: PhoneChoreography;
   progress: MotionValue<number>;
-  reveal: MotionValue<number>;
 }) {
   const outer = useRef<THREE.Group>(null);
   const screenRef = useRef<THREE.Mesh>(null);
@@ -63,10 +61,7 @@ function PhoneModel({
   const textures = useTexture(SCREEN_URLS);
 
   // Clone, center, scale, and tint the metallic frame to the brand color.
-  const { node, screen, frameMats } = useMemo(() => {
-    // Collect every material so the fade can be driven on the GPU (material
-    // opacity) instead of compositing the whole canvas layer via CSS opacity.
-    const frameMats: THREE.Material[] = [];
+  const { node, screen } = useMemo(() => {
     const s = scene.clone(true);
     s.traverse((o) => {
       const mesh = o as THREE.Mesh;
@@ -74,14 +69,9 @@ function PhoneModel({
       const mats = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
       mats.forEach((m) => {
         const mat = m as THREE.MeshStandardMaterial;
-        // Tint the solid metallic frame/back (no texture) → magenta "case".
+        // Tint the solid metallic frame/back (no texture) → brand green "case".
         if (mat && "metalness" in mat && mat.metalness > 0.2 && !mat.map) {
           mat.color = new THREE.Color(CASE_COLOR);
-        }
-        if (mat) {
-          mat.transparent = true;
-          mat.opacity = 0;
-          frameMats.push(mat);
         }
       });
     });
@@ -117,7 +107,7 @@ function PhoneModel({
     const islandY = h / 2 - islandH / 2 - h * 0.03;
 
     const screen = { w, h, z, screenGeo, islandGeo, islandY };
-    return { node: wrap, screen, frameMats };
+    return { node: wrap, screen };
   }, [scene]);
 
   textures.forEach((t) => {
@@ -125,24 +115,9 @@ function PhoneModel({
     t.anisotropy = 8;
   });
 
-  // Full list of materials whose opacity we fade each frame (model + overlays).
-  const allMats = useRef<THREE.Material[]>([]);
-
   useLayoutEffect(() => {
     if (screenMat.current) screenMat.current.map = textures[0];
-    const list: THREE.Material[] = [...frameMats];
-    if (screenMat.current) {
-      screenMat.current.transparent = true;
-      screenMat.current.opacity = 0;
-      list.push(screenMat.current);
-    }
-    if (islandMat.current) {
-      islandMat.current.transparent = true;
-      islandMat.current.opacity = 0;
-      list.push(islandMat.current);
-    }
-    allMats.current = list;
-  }, [textures, frameMats]);
+  }, [textures]);
 
   useFrame(() => {
     const g = outer.current;
@@ -154,11 +129,9 @@ function PhoneModel({
     const sc = choreo.scale.get();
     g.scale.set(sc, sc, sc);
 
-    // Initial reveal × scroll-driven fade — applied to material opacity so the
-    // canvas itself never needs CSS layer compositing.
-    const opacity = reveal.get() * choreo.opacity.get();
-    const mats = allMats.current;
-    for (let i = 0; i < mats.length; i++) mats[i].opacity = opacity;
+    // No fade: hard-hide the phone once scrolled past the app section so it
+    // doesn't sit behind the closing stats/CTA/footer.
+    g.visible = choreo.opacity.get() > 0.5;
 
     // Swap screen texture by scroll chapter (last = landscape app screen).
     const p = progress.get();
@@ -213,17 +186,9 @@ export default function Phone3D({
   progress: MotionValue<number>;
   active?: boolean;
 }) {
-  // Reveal the phone on load by easing material opacity 0→1 (see PhoneModel),
-  // driven by a MotionValue so it participates in on-demand invalidation.
-  const reveal = useMotionValue(0);
-  useEffect(() => {
-    const controls = animate(reveal, 1, { duration: 0.9, ease: "easeOut" });
-    return () => controls.stop();
-  }, [reveal]);
-
   const watched = useMemo(
-    () => [choreo.x, choreo.rotY, choreo.rotZ, choreo.scale, choreo.opacity, reveal],
-    [choreo, reveal]
+    () => [choreo.x, choreo.rotY, choreo.rotZ, choreo.scale, choreo.opacity],
+    [choreo]
   );
 
   // This component only mounts once the lazy chunk + model are loaded (the
@@ -247,7 +212,7 @@ export default function Phone3D({
         <ambientLight intensity={0.7} />
         <directionalLight position={[3, 4, 5]} intensity={2.2} />
         <pointLight color="#00DE6F" position={[-4, -2, -3]} intensity={3} />
-        <PhoneModel choreo={choreo} progress={progress} reveal={reveal} />
+        <PhoneModel choreo={choreo} progress={progress} />
         <InvalidateOnChange values={watched} />
         <Preload all />
         <AdaptiveDpr />
