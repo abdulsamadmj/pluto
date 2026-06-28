@@ -11,9 +11,8 @@ useGLTF.preload(MODEL_URL);
 const CASE_COLOR = "#e879b9"; // Pluto magenta
 const TARGET_HEIGHT = 4.3; // world units the phone should occupy
 
-// Fraction of the device front the actual screen covers (leaves a thin bezel).
-const SCREEN_W_FRAC = 0.86;
-const SCREEN_H_FRAC = 0.9;
+// Even bezel around the screen, as a fraction of device width (world units).
+const BEZEL_FRAC = 0.05;
 
 /** Rounded-rectangle plane with UVs remapped to [0,1] for texturing. */
 function roundedPlane(w: number, h: number, r: number): THREE.ShapeGeometry {
@@ -92,12 +91,13 @@ function PhoneModel({
     wrap.scale.setScalar(scale);
     wrap.rotation.y = Math.PI;
 
-    // Screen overlay sized/placed against the front face (in world units),
-    // inset to leave a thin bezel, with rounded corners + a Dynamic Island.
-    const w = size.x * scale * SCREEN_W_FRAC;
-    const h = size.y * scale * SCREEN_H_FRAC;
+    // Screen overlay against the front face (world units), inset by an EQUAL
+    // bezel on all four sides so the gap is even in both orientations.
+    const bezel = size.x * scale * BEZEL_FRAC;
+    const w = size.x * scale - bezel * 2;
+    const h = size.y * scale - bezel * 2;
     const z = (size.z * scale) / 2 + 0.015;
-    const screenGeo = roundedPlane(w, h, Math.min(w, h) * 0.11);
+    const screenGeo = roundedPlane(w, h, Math.min(w, h) * 0.13);
 
     // Dynamic Island: a black pill near the top of the screen.
     const islandW = w * 0.3;
