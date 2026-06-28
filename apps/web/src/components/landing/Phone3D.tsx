@@ -1,7 +1,7 @@
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { AdaptiveDpr, Preload, useGLTF, useTexture } from "@react-three/drei";
 import { type MotionValue } from "framer-motion";
-import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 import type { PhoneChoreography } from "./usePhoneChoreography";
 
@@ -177,6 +177,7 @@ function InvalidateOnChange({ values }: { values: MotionValue<number>[] }) {
   return null;
 }
 
+
 export default function Phone3D({
   choreo,
   progress,
@@ -191,12 +192,27 @@ export default function Phone3D({
     [choreo]
   );
 
-  // This component only mounts once the lazy chunk + model are loaded (the
-  // Suspense boundary lives in Phone3DStage), so the `phone-fade-in` CSS
-  // animation runs exactly when the phone is ready — a graceful reveal without
-  // touching the Three.js scene.
+  // Fade the canvas in once it has mounted (which only happens after the lazy
+  // chunk + model have loaded, via the Suspense boundary). Inline opacity +
+  // a double rAF guarantees the browser paints opacity:0 first, so the CSS
+  // transition animates rather than snapping straight to opaque.
+  const [ready, setReady] = useState(false);
+  useEffect(() => {
+    let inner = 0;
+    const outer = requestAnimationFrame(() => {
+      inner = requestAnimationFrame(() => setReady(true));
+    });
+    return () => {
+      cancelAnimationFrame(outer);
+      cancelAnimationFrame(inner);
+    };
+  }, []);
+
   return (
-    <div className="phone-fade-in h-full w-full">
+    <div
+      className="h-full w-full"
+      style={{ opacity: ready ? 1 : 0, transition: "opacity 700ms ease-out" }}
+    >
       <Canvas
         dpr={[1, 1.5]}
         gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
