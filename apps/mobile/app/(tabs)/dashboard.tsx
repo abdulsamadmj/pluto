@@ -8,16 +8,20 @@ import {
   ShieldX,
   type LucideIcon,
 } from "lucide-react-native";
-import { Alert, ScrollView, Text, View } from "react-native";
+import { Alert, Image, ScrollView, Text, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Button, Card, Muted } from "../../components/ui";
 import { authClient, useSession } from "../../lib/auth-client";
 import { statsQueryOptions } from "../../queries/devices.queries";
+
+const logo = require("../../assets/images/logo.png");
 
 export default function DashboardScreen() {
   const { data, isPending } = useQuery(statsQueryOptions());
   const { data: session } = useSession();
   const router = useRouter();
   const queryClient = useQueryClient();
+  const insets = useSafeAreaInsets();
 
   const confirmSignOut = () => {
     Alert.alert("Sign out?", "You'll need to sign in again to access your devices.", [
@@ -41,13 +45,28 @@ export default function DashboardScreen() {
     { label: "Expired", value: data?.expired, icon: ShieldX, color: "#f87171" },
   ];
 
+  const firstName =
+    session?.user?.name?.split(" ")[0] ??
+    session?.user?.email?.split("@")[0] ??
+    "there";
+
   return (
-    <ScrollView className="flex-1 bg-bg" contentContainerClassName="gap-6 p-4">
-      <View className="gap-1">
-        <Text className="text-2xl font-bold text-zinc-50">Dashboard</Text>
-        {session?.user ? (
-          <Muted>Signed in as {session.user.name || session.user.email}</Muted>
-        ) : null}
+    <ScrollView
+      className="flex-1 bg-bg"
+      contentContainerClassName="gap-6 p-4"
+      contentContainerStyle={{ paddingTop: insets.top + 8 }}
+    >
+      <View className="gap-5">
+        <View className="flex-row items-center gap-2.5">
+          <Image source={logo} className="size-8 rounded-lg" />
+          <Text className="text-lg font-bold text-zinc-50">Pluto</Text>
+        </View>
+        <View className="gap-1">
+          <Text className="text-2xl font-bold text-zinc-50">
+            Welcome, {firstName} 👋
+          </Text>
+          <Muted>Here&apos;s your warranty overview.</Muted>
+        </View>
       </View>
 
       <View className="flex-row flex-wrap gap-3">

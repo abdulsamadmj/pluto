@@ -1,9 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
 import { Redirect, Tabs } from "expo-router";
-import { Bell, LayoutDashboard, Smartphone } from "lucide-react-native";
+import { Bell, House, Smartphone } from "lucide-react-native";
 import { ActivityIndicator, View } from "react-native";
 import { useSession } from "../../lib/auth-client";
 import { notificationsQueryOptions } from "../../queries/notifications.queries";
+
+// Land on the Home (dashboard) tab when the app opens.
+export const unstable_settings = {
+  initialRouteName: "dashboard",
+};
 
 export default function TabsLayout() {
   const { isInitialPending, isAuthenticated } = useSession();
@@ -37,20 +42,19 @@ export default function TabsLayout() {
       }}
     >
       <Tabs.Screen
+        name="dashboard"
+        options={{
+          title: "Home",
+          headerShown: false,
+          tabBarIcon: ({ color, size }) => <House color={color} size={size} />,
+        }}
+      />
+      <Tabs.Screen
         name="index"
         options={{
           title: "Devices",
           tabBarIcon: ({ color, size }) => (
             <Smartphone color={color} size={size} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="dashboard"
-        options={{
-          title: "Dashboard",
-          tabBarIcon: ({ color, size }) => (
-            <LayoutDashboard color={color} size={size} />
           ),
         }}
       />
