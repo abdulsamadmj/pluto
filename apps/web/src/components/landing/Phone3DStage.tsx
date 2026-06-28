@@ -1,5 +1,4 @@
 import {
-  motion,
   type MotionValue,
   useMotionValueEvent,
   useReducedMotion,
@@ -41,10 +40,7 @@ export function Phone3DStage({ progress }: { progress: MotionValue<number> }) {
   });
 
   return (
-    <motion.div
-      style={{ opacity: choreo.opacity }}
-      className="pointer-events-none fixed inset-0 z-0 flex items-center justify-center"
-    >
+    <div className="pointer-events-none fixed inset-0 z-0 flex items-center justify-center">
       {canRender3D ? (
         <Suspense fallback={null}>
           <div className="h-[80vh] w-full">
@@ -54,7 +50,7 @@ export function Phone3DStage({ progress }: { progress: MotionValue<number> }) {
       ) : (
         <PhoneFallback2D />
       )}
-    </motion.div>
+    </div>
   );
 }
 

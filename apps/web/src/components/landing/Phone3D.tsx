@@ -1,6 +1,6 @@
 import { Canvas, useFrame } from "@react-three/fiber";
 import { AdaptiveDpr, Preload, useGLTF, useTexture } from "@react-three/drei";
-import { motion, type MotionValue } from "framer-motion";
+import type { MotionValue } from "framer-motion";
 import { useLayoutEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 import type { PhoneChoreography } from "./usePhoneChoreography";
@@ -56,11 +56,15 @@ function PhoneModel({
   const outer = useRef<THREE.Group>(null);
   const screenRef = useRef<THREE.Mesh>(null);
   const screenMat = useRef<THREE.MeshBasicMaterial>(null);
+  const islandMat = useRef<THREE.MeshBasicMaterial>(null);
   const { scene } = useGLTF(MODEL_URL);
   const textures = useTexture(SCREEN_URLS);
 
   // Clone, center, scale, and tint the metallic frame to the brand color.
-  const { node, screen } = useMemo(() => {
+  const { node, screen, frameMats } = useMemo(() => {
+    // Collect every material so the fade can be driven on the GPU (material
+    // opacity) instead of compositing the whole canvas layer via CSS opacity.
+    const frameMats: THREE.Material[] = [];
     const s = scene.clone(true);
     s.traverse((o) => {
       const mesh = o as THREE.Mesh;
@@ -71,6 +75,11 @@ function PhoneModel({
         // Tint the solid metallic frame/back (no texture) → magenta "case".
         if (mat && "metalness" in mat && mat.metalness > 0.2 && !mat.map) {
           mat.color = new THREE.Color(CASE_COLOR);
+        }
+        if (mat) {
+          mat.transparent = true;
+          mat.opacity = 0;
+          frameMats.push(mat);
         }
       });
     });
@@ -106,7 +115,7 @@ function PhoneModel({
     const islandY = h / 2 - islandH / 2 - h * 0.03;
 
     const screen = { w, h, z, screenGeo, islandGeo, islandY };
-    return { node: wrap, screen };
+    return { node: wrap, screen, frameMats };
   }, [scene]);
 
   textures.forEach((t) => {
@@ -114,9 +123,25 @@ function PhoneModel({
     t.anisotropy = 8;
   });
 
+  // Full list of materials whose opacity we fade each frame (model + overlays).
+  const allMats = useRef<THREE.Material[]>([]);
+  const revealStart = useRef<number | null>(null);
+
   useLayoutEffect(() => {
     if (screenMat.current) screenMat.current.map = textures[0];
-  }, [textures]);
+    const list: THREE.Material[] = [...frameMats];
+    if (screenMat.current) {
+      screenMat.current.transparent = true;
+      screenMat.current.opacity = 0;
+      list.push(screenMat.current);
+    }
+    if (islandMat.current) {
+      islandMat.current.transparent = true;
+      islandMat.current.opacity = 0;
+      list.push(islandMat.current);
+    }
+    allMats.current = list;
+  }, [textures, frameMats]);
 
   useFrame(({ clock }) => {
     const g = outer.current;
@@ -127,6 +152,15 @@ function PhoneModel({
     g.rotation.z = choreo.rotZ.get();
     const sc = choreo.scale.get();
     g.scale.set(sc, sc, sc);
+
+    // Initial reveal (time-based, easeOut) × scroll-driven fade — applied to
+    // material opacity so the canvas itself never needs CSS layer compositing.
+    if (revealStart.current === null) revealStart.current = clock.elapsedTime;
+    const t = Math.min((clock.elapsedTime - revealStart.current) / 0.9, 1);
+    const reveal = 1 - Math.pow(1 - t, 3);
+    const opacity = reveal * choreo.opacity.get();
+    const mats = allMats.current;
+    for (let i = 0; i < mats.length; i++) mats[i].opacity = opacity;
 
     // Swap screen texture by scroll chapter (last = landscape app screen).
     const p = progress.get();
@@ -149,7 +183,7 @@ function PhoneModel({
         geometry={screen.islandGeo}
         position={[0, screen.islandY, screen.z + 0.004]}
       >
-        <meshBasicMaterial color="#000000" toneMapped={false} />
+        <meshBasicMaterial ref={islandMat} color="#000000" toneMapped={false} />
       </mesh>
     </group>
   );
@@ -165,15 +199,11 @@ export default function Phone3D({
   active?: boolean;
 }) {
   // This component only mounts once the lazy chunk + model are loaded (the
-  // Suspense boundary lives in Phone3DStage), so fading the container here
-  // gracefully reveals the phone instead of popping it in.
+  // Suspense boundary lives in Phone3DStage). The reveal + scroll fade are
+  // driven on material opacity inside the scene (see PhoneModel) rather than
+  // CSS opacity, so the browser never composites the whole canvas as a layer.
   return (
-    <motion.div
-      className="h-full w-full"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.9, ease: "easeOut" }}
-    >
+    <div className="h-full w-full">
       <Canvas
         dpr={[1, 1.5]}
         gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
@@ -192,6 +222,6 @@ export default function Phone3D({
         <Preload all />
         <AdaptiveDpr />
       </Canvas>
-    </motion.div>
+    </div>
   );
 }
