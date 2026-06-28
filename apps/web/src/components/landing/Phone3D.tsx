@@ -8,7 +8,7 @@ import type { PhoneChoreography } from "./usePhoneChoreography";
 const MODEL_URL = "/models/iphone.glb";
 useGLTF.preload(MODEL_URL);
 
-const CASE_COLOR = "#e879b9"; // Pluto magenta
+const CASE_COLOR = "#00DE6F"; // Pluto magenta
 const TARGET_HEIGHT = 4.3; // world units the phone should occupy
 
 // Even bezel around the screen, as a fraction of device width (world units).
@@ -246,7 +246,7 @@ export default function Phone3D({
       >
         <ambientLight intensity={0.7} />
         <directionalLight position={[3, 4, 5]} intensity={2.2} />
-        <pointLight color="#ec4899" position={[-4, -2, -3]} intensity={3} />
+        <pointLight color="#00DE6F" position={[-4, -2, -3]} intensity={3} />
         <PhoneModel choreo={choreo} progress={progress} reveal={reveal} />
         <InvalidateOnChange values={watched} />
         <Preload all />

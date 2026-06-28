@@ -9,12 +9,12 @@ import { StoreBadges } from "./StoreBadges";
  */
 export function MobileLanding() {
   return (
-    <div className="relative flex h-[100dvh] flex-col overflow-hidden bg-zinc-950 px-6 text-zinc-50">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(600px_400px_at_50%_0%,rgba(232,121,185,0.18),transparent),radial-gradient(500px_300px_at_50%_100%,rgba(120,80,255,0.16),transparent)]" />
+    <div className="relative flex h-[100dvh] flex-col overflow-hidden bg-[#222222] px-6 text-zinc-50">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(600px_400px_at_50%_0%,rgba(0,222,111,0.18),transparent),radial-gradient(500px_300px_at_50%_100%,rgba(0,222,111,0.16),transparent)]" />
 
       {/* Logo */}
       <header className="relative flex items-center gap-2 py-5 font-bold">
-        <span className="grid size-8 place-items-center rounded-lg bg-gradient-to-br from-primary to-purple-500 text-base">
+        <span className="grid size-8 place-items-center rounded-lg bg-gradient-to-br from-primary to-emerald-500 text-base">
           🛡️
         </span>
         <span className="font-display text-2xl tracking-tight">Pluto</span>
@@ -27,7 +27,7 @@ export function MobileLanding() {
         </span>
         <h1 className="mt-5 font-display text-5xl leading-[1.05]">
           Never miss a{" "}
-          <span className="bg-gradient-to-r from-primary via-purple-300 to-pink-300 bg-clip-text text-transparent">
+          <span className="bg-gradient-to-r from-primary via-emerald-300 to-teal-300 bg-clip-text text-transparent">
             warranty
           </span>{" "}
           again.

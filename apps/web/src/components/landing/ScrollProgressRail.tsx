@@ -47,7 +47,7 @@ function RailDot({
   const color = useTransform(
     progress,
     [start, end],
-    ["#e879b9", "#e879b9"]
+    ["#00DE6F", "#00DE6F"]
   );
   return (
     <motion.span

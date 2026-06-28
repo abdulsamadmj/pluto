@@ -24,7 +24,7 @@ export function MobileAppSection() {
       id="app"
       className="relative flex min-h-screen items-center justify-center px-5 py-24"
     >
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(700px_400px_at_50%_60%,rgba(232,121,185,0.12),transparent)]" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(700px_400px_at_50%_60%,rgba(0,222,111,0.12),transparent)]" />
       <motion.div
         variants={container}
         initial="hidden"

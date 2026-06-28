@@ -37,7 +37,7 @@ function DesktopLanding() {
 
   return (
     <MotionConfig reducedMotion="user">
-      <div ref={pageRef} className="relative min-h-screen bg-zinc-950 text-zinc-50">
+      <div ref={pageRef} className="relative min-h-screen bg-[#222222] text-zinc-50">
         <MarketingNav />
         <Phone3DStage progress={scrollYProgress} />
         <ScrollProgressRail progress={scrollYProgress} />
@@ -86,7 +86,7 @@ function DesktopLanding() {
 function Logo() {
   return (
     <Link to="/" className="flex items-center gap-2 font-bold">
-      <span className="grid size-8 place-items-center rounded-lg bg-gradient-to-br from-primary to-purple-500 text-base">
+      <span className="grid size-8 place-items-center rounded-lg bg-gradient-to-br from-primary to-emerald-500 text-base">
         🛡️
       </span>
       <span className="font-display text-2xl tracking-tight">Pluto</span>
@@ -96,7 +96,7 @@ function Logo() {
 
 function MarketingNav() {
   return (
-    <header className="fixed inset-x-0 top-0 z-40 border-b border-white/5 bg-zinc-950/90">
+    <header className="fixed inset-x-0 top-0 z-40 border-b border-white/5 bg-[#222222]/90">
       <nav className="mx-auto flex max-w-6xl items-center justify-between px-5 py-4">
         <Logo />
         <div className="hidden items-center gap-8 font-mono text-xs uppercase tracking-wider text-zinc-400 md:flex">
@@ -131,7 +131,7 @@ function Hero() {
       >
         <h1 className="mx-auto mt-6 max-w-3xl font-display text-6xl leading-[1.02] tracking-tight md:text-8xl">
           Never miss a{" "}
-          <span className="bg-gradient-to-r from-primary via-purple-300 to-pink-300 bg-clip-text text-transparent">
+          <span className="bg-gradient-to-r from-primary via-emerald-300 to-teal-300 bg-clip-text text-transparent">
             warranty
           </span>{" "}
           again.
@@ -173,7 +173,7 @@ function Stats() {
   return (
     <section
       id="stats"
-      className="relative border-t border-white/5 bg-zinc-950 py-28"
+      className="relative border-t border-white/5 bg-[#222222] py-28"
     >
       <div className="mx-auto grid max-w-6xl grid-cols-2 gap-10 px-5 text-center lg:grid-cols-4">
         {STATS.map(([value, label]) => (
@@ -206,7 +206,7 @@ function CountUp({ target, label }: { target: number; label: string }) {
     <div ref={ref}>
       <p
         ref={numRef}
-        className="bg-gradient-to-r from-primary to-purple-300 bg-clip-text font-display text-5xl font-bold text-transparent md:text-6xl"
+        className="bg-gradient-to-r from-primary to-emerald-300 bg-clip-text font-display text-5xl font-bold text-transparent md:text-6xl"
       >
         0
       </p>
@@ -228,7 +228,7 @@ function CallToAction() {
   return (
     <section className="relative px-5 py-28">
       <div className="mx-auto max-w-4xl">
-        <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-primary/20 via-purple-500/10 to-transparent p-10 text-center md:p-16">
+        <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-primary/20 via-emerald-500/10 to-transparent p-10 text-center md:p-16">
           <h2 className="font-display text-4xl leading-tight md:text-5xl">
             Take control of your warranties.
           </h2>
@@ -246,7 +246,7 @@ function CallToAction() {
 
 function Footer() {
   return (
-    <footer className="relative border-t border-white/5 bg-zinc-950 py-10">
+    <footer className="relative border-t border-white/5 bg-[#222222] py-10">
       <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-5 text-sm text-zinc-500 sm:flex-row">
         <Logo />
         <p className="font-mono text-xs">

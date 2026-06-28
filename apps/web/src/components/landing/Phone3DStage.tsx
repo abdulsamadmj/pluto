@@ -58,7 +58,7 @@ export function Phone3DStage({ progress }: { progress: MotionValue<number> }) {
 function PhoneFallback2D() {
   return (
     <div className="relative h-[60vh] max-h-[640px] w-auto" style={{ aspectRatio: "9 / 19" }}>
-      <div className="h-full overflow-hidden rounded-[2rem] border-4 border-zinc-800 bg-zinc-900 shadow-2xl">
+      <div className="h-full overflow-hidden rounded-[2rem] border-4 border-zinc-800 bg-[#2b2b2b] shadow-2xl">
         <img
           src="/app-screen.png"
           alt="Pluto app screenshot"

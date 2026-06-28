@@ -24,11 +24,11 @@ export function AppShell({ children }: { children: ReactNode }) {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-50">
-      <header className="sticky top-0 z-30 border-b border-white/5 bg-zinc-950/80 backdrop-blur">
+    <div className="min-h-screen bg-[#222222] text-zinc-50">
+      <header className="sticky top-0 z-30 border-b border-white/5 bg-[#222222]/80 backdrop-blur">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-3.5">
           <Link to="/dashboard" className="flex items-center gap-2 font-bold">
-            <span className="grid size-8 place-items-center rounded-lg bg-gradient-to-br from-primary to-purple-500">
+            <span className="grid size-8 place-items-center rounded-lg bg-gradient-to-br from-primary to-emerald-500">
               🛡️
             </span>
             <span className="text-lg tracking-tight">Pluto</span>

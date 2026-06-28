@@ -102,7 +102,7 @@ function MetricCards() {
       {cards.map((c) => (
         <div
           key={c.label}
-          className="rounded-xl border border-white/10 bg-zinc-900/40 p-5"
+          className="rounded-xl border border-white/10 bg-[#2b2b2b]/40 p-5"
         >
           <div className="flex items-center justify-between">
             <p className="text-sm text-zinc-400">{c.label}</p>
@@ -202,7 +202,7 @@ function DeviceTable() {
   );
 
   return (
-    <div className="rounded-xl border border-white/10 bg-zinc-900/40">
+    <div className="rounded-xl border border-white/10 bg-[#2b2b2b]/40">
       {/* Toolbar */}
       <div className="flex flex-col gap-3 border-b border-white/5 p-4 lg:flex-row lg:items-center">
         <Input

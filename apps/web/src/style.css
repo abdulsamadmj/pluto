@@ -9,7 +9,7 @@
   --font-geist-mono: "Geist Mono", ui-monospace, monospace;
 }
 body {
-  @apply bg-zinc-950 text-zinc-50 font-sans antialiased;
+  @apply bg-background text-foreground font-sans antialiased;
 }
 
 /*
@@ -49,8 +49,8 @@ body {
     --card-foreground: 240 10% 3.9%;
     --popover: 0 0% 100%;
     --popover-foreground: 240 10% 3.9%;
-    --primary: 327 66% 69%;
-    --primary-foreground: 337 65.5% 17.1%;
+    --primary: 150 100% 43.5%;
+    --primary-foreground: 0 0% 8%;
     --secondary: 240 4.8% 95.9%;
     --secondary-foreground: 240 5.9% 10%;
     --muted: 240 4.8% 95.9%;
@@ -66,24 +66,25 @@ body {
   }
 
   .dark {
-    --background: 240 10% 3.9%;
+    /* Pluto dark theme — base #222222, primary #00DE6F. */
+    --background: 0 0% 13.3%;
     --foreground: 0 0% 98%;
-    --card: 240 10% 3.9%;
+    --card: 0 0% 16.5%;
     --card-foreground: 0 0% 98%;
-    --popover: 240 10% 3.9%;
+    --popover: 0 0% 16.5%;
     --popover-foreground: 0 0% 98%;
-    --primary: 327 66% 69%;
-    --primary-foreground: 337 65.5% 17.1%;
-    --secondary: 240 3.7% 15.9%;
+    --primary: 150 100% 43.5%;
+    --primary-foreground: 0 0% 8%;
+    --secondary: 0 0% 20%;
     --secondary-foreground: 0 0% 98%;
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
-    --accent: 240 3.7% 15.9%;
+    --muted: 0 0% 20%;
+    --muted-foreground: 0 0% 64%;
+    --accent: 0 0% 20%;
     --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
+    --destructive: 0 62.8% 40%;
     --destructive-foreground: 0 85.7% 97.3%;
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 240 4.9% 83.9%;
+    --border: 0 0% 26%;
+    --input: 0 0% 26%;
+    --ring: 150 100% 43.5%;
   }
 }

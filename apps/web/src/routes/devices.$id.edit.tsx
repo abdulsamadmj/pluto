@@ -47,7 +47,7 @@ function EditDevicePage() {
 
       <h1 className="mb-6 text-2xl font-bold">Edit device</h1>
 
-      <div className="max-w-2xl rounded-xl border border-white/10 bg-zinc-900/40 p-6">
+      <div className="max-w-2xl rounded-xl border border-white/10 bg-[#2b2b2b]/40 p-6">
         {isPending ? (
           <div className="flex flex-col gap-4">
             {Array.from({ length: 6 }).map((_, i) => (
