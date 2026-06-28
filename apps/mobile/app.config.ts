@@ -19,12 +19,15 @@ const config: ExpoConfig = {
     bundler: "metro",
     output: "single",
   },
-  plugins: ["expo-router", "expo-secure-store"],
+  plugins: ["expo-router", "expo-secure-store", "./plugins/withFmtConsteval"],
   experiments: {
     typedRoutes: true,
   },
   extra: {
     serverUrl: process.env.EXPO_PUBLIC_SERVER_URL,
+    eas: {
+      projectId: "46177106-9b60-43b5-8cd9-af86ad132a24",
+    },
   },
 };
 

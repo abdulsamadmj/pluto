@@ -16,4 +16,36 @@ config.resolver.nodeModulesPaths = [
   path.resolve(monorepoRoot, "node_modules"),
 ];
 
-module.exports = withNativeWind(config, { input: "./global.css" });
+const nativeWindConfig = withNativeWind(config, { input: "./global.css" });
+
+// Force a single copy of React (19.0.0, from this app) for every `react` /
+// `react-dom` import. The web app pins React 18, which pnpm hoists to the root
+// node_modules; without this, packages that lack a nested React fall back to
+// that root copy while react-native uses 19, producing the runtime error
+// "Invalid hook call ... more than one copy of React".
+const SINGLETON_PREFIXES = ["react", "react-dom"];
+const upstreamResolveRequest = nativeWindConfig.resolver.resolveRequest;
+
+nativeWindConfig.resolver.resolveRequest = (context, moduleName, platform) => {
+  const isSingleton = SINGLETON_PREFIXES.some(
+    (pkg) => moduleName === pkg || moduleName.startsWith(`${pkg}/`),
+  );
+
+  if (isSingleton) {
+    try {
+      return {
+        type: "sourceFile",
+        filePath: require.resolve(moduleName, { paths: [projectRoot] }),
+      };
+    } catch {
+      // Fall through to default resolution if the subpath isn't resolvable.
+    }
+  }
+
+  if (upstreamResolveRequest) {
+    return upstreamResolveRequest(context, moduleName, platform);
+  }
+  return context.resolveRequest(context, moduleName, platform);
+};
+
+module.exports = nativeWindConfig;
