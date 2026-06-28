@@ -19,6 +19,10 @@ PostgreSQL schema through the API to the rendered table cell.
   all driven server-side and reflected in the URL.
 - **Device details** — full profile with purchase/warranty info, an expiry
   countdown with coverage progress bar, a warranty timeline, and editable notes.
+- **Device CRUD** — create (bottom sheet), edit (dedicated page), delete (warning
+  dialog), plus a table/grid view toggle — on both web and mobile.
+- **Companion mobile app** — a full Expo (React Native) app sharing the same
+  Hono API, validators, and Better-Auth (native) — auth, list, details, CRUD.
 - **Type-safe API** — Hono routes consumed through Hono RPC + React Query, so
   the client never hand-writes a fetch call or a response type.
 
@@ -84,13 +88,18 @@ Drizzle schema  →  inferred row types  →  shared Zod validators
 │   │   │   └── services/
 │   │   │       └── devices.service.ts  # search→filter→sort→paginate (Drizzle)
 │   │   └── drizzle.config.ts
-│   └── web/                        # React + Vite + TanStack Router
-│       └── src/
-│           ├── routes/             # file-based routes (see below)
-│           ├── queries/            # typed query/mutation options
-│           ├── components/         # app-shell, auth-layout, status-badge
-│           ├── lib/                # formatters, auth guard, auth schemas
-│           └── utils/              # hono-client, auth-client
+│   ├── web/                        # React + Vite + TanStack Router
+│   │   └── src/
+│   │       ├── routes/             # file-based routes (see below)
+│   │       ├── queries/            # typed query/mutation options
+│   │       ├── components/         # app-shell, device-form/grid, dialogs…
+│   │       ├── lib/                # formatters, icons, auth guard, schemas
+│   │       └── utils/              # hono-client, auth-client
+│   └── mobile/                     # Expo (React Native) + Expo Router
+│       ├── app/                    # file-based screens (auth, tabs, devices)
+│       ├── components/             # native UI, device form/list, sheet
+│       ├── lib/                    # hono-client, auth-client, query-client
+│       └── queries/               # typed query/mutation options (shared API)
 └── packages/
     ├── ui/                         # Shadcn components (Button, Table, Select, …)
     └── validators/                 # shared Zod schemas + status helper
@@ -120,6 +129,9 @@ All `/devices` and `/stats` routes require an authenticated session
 | `GET`   | `/health`                 | Health check |
 | `GET`   | `/devices`                | Paginated list (search/filter/sort) |
 | `GET`   | `/devices/:id`            | Single device incl. warranty timeline |
+| `POST`  | `/devices`                | Create a device (derives expiry + purchase event) |
+| `PATCH` | `/devices/:id`            | Update a device (recomputes expiry) |
+| `DELETE`| `/devices/:id`            | Delete a device (timeline cascades) |
 | `PATCH` | `/devices/:id/notes`      | Update a device's notes |
 | `GET`   | `/stats`                  | Dashboard summary metrics |
 | `GET`   | `/stats/meta`             | Distinct brands & categories (for filters) |
@@ -203,6 +215,23 @@ pnpm dev        # starts the Hono API (:8080) and the web app (:5173)
 
 Open **http://localhost:5173**, click **Get started**, and create an account
 (any email + password ≥ 8 chars). The seeded devices are visible to any account.
+
+### Run the mobile app (Expo)
+
+The Expo app lives in `apps/mobile` and talks to the same API.
+
+```bash
+# 1. Make sure the API is running (pnpm dev, or the server alone).
+# 2. Point the app at your API:
+cp apps/mobile/.env.example apps/mobile/.env
+#    Simulator/web → http://localhost:8080
+#    Physical device (Expo Go) → http://<YOUR_LAN_IP>:8080  (same Wi-Fi)
+# 3. Start Expo:
+pnpm --filter @repo/mobile dev      # then press i / a / w, or scan the QR
+```
+
+> The monorepo uses **`node-linker=hoisted`** (in `.npmrc`) — required for Expo's
+> Metro bundler to resolve dependencies in a pnpm workspace.
 
 ### Useful commands
 
