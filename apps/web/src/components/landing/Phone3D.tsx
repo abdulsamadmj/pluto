@@ -52,7 +52,7 @@ export default function Phone3D({ choreo }: { choreo: PhoneChoreography }) {
     <Canvas
       dpr={[1, 2]}
       gl={{ antialias: true, alpha: true }}
-      camera={{ position: [0, 0, 6], fov: 35 }}
+      camera={{ position: [0, 0, 10], fov: 35 }}
       style={{ width: "100%", height: "100%" }}
     >
       <ambientLight intensity={0.6} />
