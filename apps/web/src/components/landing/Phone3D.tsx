@@ -1,6 +1,6 @@
 import { Canvas, useFrame } from "@react-three/fiber";
 import { AdaptiveDpr, Preload, useGLTF, useTexture } from "@react-three/drei";
-import { type MotionValue } from "framer-motion";
+import { motion, type MotionValue } from "framer-motion";
 import { useLayoutEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 import type { PhoneChoreography } from "./usePhoneChoreography";
@@ -162,19 +162,29 @@ export default function Phone3D({
   choreo: PhoneChoreography;
   progress: MotionValue<number>;
 }) {
+  // This component only mounts once the lazy chunk + model are loaded (the
+  // Suspense boundary lives in Phone3DStage), so fading the container here
+  // gracefully reveals the phone instead of popping it in.
   return (
-    <Canvas
-      dpr={[1, 2]}
-      gl={{ antialias: true, alpha: true }}
-      camera={{ position: [0, 0, 10], fov: 35 }}
-      style={{ width: "100%", height: "100%" }}
+    <motion.div
+      className="h-full w-full"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.9, ease: "easeOut" }}
     >
-      <ambientLight intensity={0.7} />
-      <directionalLight position={[3, 4, 5]} intensity={2.2} />
-      <pointLight color="#ec4899" position={[-4, -2, -3]} intensity={3} />
-      <PhoneModel choreo={choreo} progress={progress} />
-      <Preload all />
-      <AdaptiveDpr pixelated />
-    </Canvas>
+      <Canvas
+        dpr={[1, 2]}
+        gl={{ antialias: true, alpha: true }}
+        camera={{ position: [0, 0, 10], fov: 35 }}
+        style={{ width: "100%", height: "100%" }}
+      >
+        <ambientLight intensity={0.7} />
+        <directionalLight position={[3, 4, 5]} intensity={2.2} />
+        <pointLight color="#ec4899" position={[-4, -2, -3]} intensity={3} />
+        <PhoneModel choreo={choreo} progress={progress} />
+        <Preload all />
+        <AdaptiveDpr pixelated />
+      </Canvas>
+    </motion.div>
   );
 }
