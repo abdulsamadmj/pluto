@@ -14,9 +14,7 @@ export function MobileLanding() {
 
       {/* Logo */}
       <header className="relative flex items-center gap-2 py-5 font-bold">
-        <span className="grid size-8 place-items-center rounded-lg bg-gradient-to-br from-primary to-emerald-500 text-base">
-          🛡️
-        </span>
+        <img src="/logo.png" alt="Pluto" className="size-8 rounded-lg" />
         <span className="font-display text-2xl tracking-tight">Pluto</span>
       </header>
 

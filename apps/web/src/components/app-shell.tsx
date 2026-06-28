@@ -36,9 +36,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <header className="sticky top-0 z-30 border-b border-white/5 bg-[#181818]/80 backdrop-blur">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-3.5">
           <Link to="/dashboard" className="flex items-center gap-2 font-bold">
-            <span className="grid size-8 place-items-center rounded-lg bg-gradient-to-br from-primary to-emerald-500">
-              🛡️
-            </span>
+            <img src="/logo.png" alt="Pluto" className="size-8 rounded-lg" />
             <span className="text-lg tracking-tight">Pluto</span>
           </Link>
           <div className="flex items-center gap-3">

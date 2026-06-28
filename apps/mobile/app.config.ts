@@ -8,16 +8,27 @@ const config: ExpoConfig = {
   orientation: "portrait",
   userInterfaceStyle: "dark",
   newArchEnabled: true,
+  icon: "./assets/images/logo.png",
+  splash: {
+    image: "./assets/images/logo.png",
+    resizeMode: "contain",
+    backgroundColor: "#181818",
+  },
   ios: {
     supportsTablet: true,
     bundleIdentifier: "com.smileox.pluto",
   },
   android: {
     package: "com.smileox.pluto",
+    adaptiveIcon: {
+      foregroundImage: "./assets/images/logo.png",
+      backgroundColor: "#181818",
+    },
   },
   web: {
     bundler: "metro",
     output: "single",
+    favicon: "./assets/images/logo.png",
   },
   plugins: ["expo-router", "expo-secure-store", "./plugins/withFmtConsteval"],
   experiments: {
