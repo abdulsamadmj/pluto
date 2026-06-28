@@ -8,7 +8,7 @@ import {
   useScroll,
 } from "framer-motion";
 import { ChevronDown } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { Chapter } from "../components/landing/Chapter";
 import { MobileAppSection } from "../components/landing/MobileAppSection";
 import { MobileLanding } from "../components/landing/MobileLanding";
@@ -186,23 +186,29 @@ function Stats() {
 
 function CountUp({ target, label }: { target: number; label: string }) {
   const ref = useRef<HTMLDivElement>(null);
+  const numRef = useRef<HTMLParagraphElement>(null);
   const inView = useInView(ref, { once: true, margin: "-20% 0px" });
-  const [display, setDisplay] = useState(0);
 
   useEffect(() => {
     if (!inView) return;
+    // Write straight to the DOM node — avoids a React re-render every frame.
     const controls = animate(0, target, {
       duration: 1.4,
       ease: [0.22, 1, 0.36, 1],
-      onUpdate: (v) => setDisplay(v),
+      onUpdate: (v) => {
+        if (numRef.current) numRef.current.textContent = formatCompact(v);
+      },
     });
     return () => controls.stop();
   }, [inView, target]);
 
   return (
     <div ref={ref}>
-      <p className="bg-gradient-to-r from-primary to-purple-300 bg-clip-text font-display text-5xl font-bold text-transparent md:text-6xl">
-        {formatCompact(display)}
+      <p
+        ref={numRef}
+        className="bg-gradient-to-r from-primary to-purple-300 bg-clip-text font-display text-5xl font-bold text-transparent md:text-6xl"
+      >
+        0
       </p>
       <p className="mt-2 font-mono text-xs uppercase tracking-wider text-zinc-400">
         {label}
