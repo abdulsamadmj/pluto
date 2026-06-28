@@ -54,9 +54,15 @@ function PhoneModel({
     box.getSize(size);
     box.getCenter(center);
     const scale = TARGET_HEIGHT / size.y;
-    // Center at origin, then scale about origin (center stays centered).
+
+    // Center the geometry at the origin (scale 1), then put it in a wrapper that
+    // scales and rotates 180° on Y so the SCREEN faces the camera (+z) instead
+    // of the back. Wrapping keeps it centered regardless of rotation.
     s.position.sub(center);
-    s.scale.setScalar(scale);
+    const wrap = new THREE.Group();
+    wrap.add(s);
+    wrap.scale.setScalar(scale);
+    wrap.rotation.y = Math.PI;
 
     // Screen overlay sized/placed against the front face (in world units).
     const screen = {
@@ -64,7 +70,7 @@ function PhoneModel({
       h: size.y * scale * 0.94,
       z: (size.z * scale) / 2 + 0.02,
     };
-    return { node: s, screen };
+    return { node: wrap, screen };
   }, [scene]);
 
   textures.forEach((t) => {
