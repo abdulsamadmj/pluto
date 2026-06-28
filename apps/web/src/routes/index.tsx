@@ -1,20 +1,73 @@
 import { Button } from "@repo/ui/button";
 import { createFileRoute, Link } from "@tanstack/react-router";
+import {
+  animate,
+  motion,
+  MotionConfig,
+  useInView,
+  useScroll,
+} from "framer-motion";
+import { ChevronDown } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Chapter } from "../components/landing/Chapter";
+import { MobileAppSection } from "../components/landing/MobileAppSection";
+import { Phone3DStage } from "../components/landing/Phone3DStage";
+import { ScrollProgressRail } from "../components/landing/ScrollProgressRail";
 
 export const Route = createFileRoute("/")({
   component: LandingPage,
 });
 
 function LandingPage() {
+  const pageRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: pageRef,
+    offset: ["start start", "end end"],
+  });
+
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-50">
-      <MarketingNav />
-      <Hero />
-      <Features />
-      <Stats />
-      <CallToAction />
-      <Footer />
-    </div>
+    <MotionConfig reducedMotion="user">
+      <div ref={pageRef} className="relative min-h-screen bg-zinc-950 text-zinc-50">
+        <MarketingNav />
+        <Phone3DStage progress={scrollYProgress} />
+        <ScrollProgressRail progress={scrollYProgress} />
+
+        <main className="relative z-10">
+          <Hero />
+
+          <Chapter
+            index="01"
+            eyebrow="Catalog"
+            align="left"
+            title={<>Every device, in one place.</>}
+            body="Laptops, phones, TVs, appliances — capture purchase details, serials, and receipts in a single organized catalog."
+          />
+          <Chapter
+            index="02"
+            eyebrow="Stay ahead"
+            align="right"
+            title={
+              <>
+                Never miss an <em className="text-primary not-italic">expiry</em>.
+              </>
+            }
+            body="See what's active, expiring within 30 days, or already lapsed — and act before coverage runs out."
+          />
+          <Chapter
+            index="03"
+            eyebrow="History"
+            align="left"
+            title={<>A full warranty timeline.</>}
+            body="Track each device's lifecycle — purchase, registration, claims, repairs, and expiry — at a glance."
+          />
+
+          <MobileAppSection />
+          <Stats />
+          <CallToAction />
+          <Footer />
+        </main>
+      </div>
+    </MotionConfig>
   );
 }
 
@@ -24,22 +77,22 @@ function Logo() {
       <span className="grid size-8 place-items-center rounded-lg bg-gradient-to-br from-primary to-purple-500 text-base">
         🛡️
       </span>
-      <span className="text-lg tracking-tight">Pluto</span>
+      <span className="font-display text-2xl tracking-tight">Pluto</span>
     </Link>
   );
 }
 
 function MarketingNav() {
   return (
-    <header className="sticky top-0 z-30 border-b border-white/5 bg-zinc-950/80 backdrop-blur">
+    <header className="fixed inset-x-0 top-0 z-40 border-b border-white/5 bg-zinc-950/70 backdrop-blur">
       <nav className="mx-auto flex max-w-6xl items-center justify-between px-5 py-4">
         <Logo />
-        <div className="hidden items-center gap-8 text-sm text-zinc-400 md:flex">
-          <a href="#features" className="hover:text-white">
-            Features
+        <div className="hidden items-center gap-8 font-mono text-xs uppercase tracking-wider text-zinc-400 md:flex">
+          <a href="#app" className="hover:text-white">
+            Mobile app
           </a>
           <a href="#stats" className="hover:text-white">
-            Why us
+            Why Pluto
           </a>
         </div>
         <div className="flex items-center gap-2">
@@ -57,193 +110,112 @@ function MarketingNav() {
 
 function Hero() {
   return (
-    <section className="relative overflow-hidden">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(1200px_400px_at_20%_-10%,rgba(120,80,255,0.18),transparent),radial-gradient(900px_300px_at_90%_0%,rgba(236,72,153,0.14),transparent)]" />
-      <div className="mx-auto max-w-6xl px-5 py-24 text-center md:py-32">
-        <span className="inline-block rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-xs font-medium uppercase tracking-wider text-primary">
+    <section className="relative flex min-h-screen flex-col items-center justify-between px-5 pb-12 pt-28 text-center">
+      <motion.div
+        initial={{ opacity: 0, y: 24 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+        className="mx-auto max-w-3xl"
+      >
+        <span className="inline-block rounded-full border border-white/10 bg-white/5 px-4 py-1.5 font-mono text-xs uppercase tracking-[0.2em] text-primary">
           Warranty &amp; Device Tracker
         </span>
-        <h1 className="mx-auto mt-6 max-w-3xl text-4xl font-extrabold leading-tight tracking-tight md:text-6xl">
+        <h1 className="mx-auto mt-6 max-w-3xl font-display text-6xl leading-[1.02] tracking-tight md:text-8xl">
           Never miss a{" "}
-          <span className="bg-gradient-to-r from-primary via-purple-400 to-pink-400 bg-clip-text text-transparent">
-            warranty expiry
+          <span className="bg-gradient-to-r from-primary via-purple-300 to-pink-300 bg-clip-text text-transparent">
+            warranty
           </span>{" "}
-          again
+          again.
         </h1>
-        <p className="mx-auto mt-6 max-w-2xl text-lg text-zinc-400">
-          Catalog every device you own, track warranty coverage, and get ahead
-          of upcoming expirations — all from one centralized dashboard.
+      </motion.div>
+
+      <motion.div
+        initial={{ opacity: 0, y: 24 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.7, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
+        className="mx-auto max-w-xl"
+      >
+        <p className="text-lg text-zinc-400">
+          Catalog every device you own, track warranty coverage, and get ahead of
+          upcoming expirations — from web and mobile.
         </p>
-        <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
+        <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
           <Button asChild size="lg">
             <Link to="/sign-up">Start tracking free</Link>
           </Button>
           <Button asChild size="lg" variant="outline">
-            <Link to="/sign-in">View the dashboard</Link>
+            <Link to="/sign-in">Open the dashboard</Link>
           </Button>
         </div>
-        <div className="mt-16">
-          <DashboardPreview />
-        </div>
-      </div>
+        <ChevronDown className="mx-auto mt-10 size-5 animate-bounce text-zinc-600" />
+      </motion.div>
     </section>
   );
 }
 
-function DashboardPreview() {
-  const rows = [
-    { name: 'MacBook Pro 16"', brand: "Apple", status: "Active", tone: "emerald" },
-    { name: "Galaxy S24 Ultra", brand: "Samsung", status: "Expiring soon", tone: "amber" },
-    { name: "Bravia X90L", brand: "Sony", status: "Expired", tone: "red" },
-  ] as const;
-  const toneMap = {
-    emerald: "bg-emerald-500/10 text-emerald-400",
-    amber: "bg-amber-500/10 text-amber-400",
-    red: "bg-red-500/10 text-red-400",
-  };
-  return (
-    <div className="mx-auto max-w-3xl rounded-2xl border border-white/10 bg-zinc-900/60 p-4 text-left shadow-2xl backdrop-blur">
-      <div className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
-        {[
-          ["Total", "250"],
-          ["Active", "103"],
-          ["Expiring", "6"],
-          ["Expired", "141"],
-        ].map(([label, value]) => (
-          <div
-            key={label}
-            className="rounded-lg border border-white/5 bg-zinc-950/50 p-3"
-          >
-            <p className="text-xs text-zinc-500">{label}</p>
-            <p className="text-xl font-bold">{value}</p>
-          </div>
-        ))}
-      </div>
-      <div className="overflow-hidden rounded-lg border border-white/5">
-        {rows.map((r, i) => (
-          <div
-            key={r.name}
-            className={`flex items-center justify-between px-4 py-3 text-sm ${
-              i > 0 ? "border-t border-white/5" : ""
-            }`}
-          >
-            <div>
-              <p className="font-medium">{r.name}</p>
-              <p className="text-xs text-zinc-500">{r.brand}</p>
-            </div>
-            <span
-              className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${toneMap[r.tone]}`}
-            >
-              {r.status}
-            </span>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-const FEATURES = [
-  {
-    icon: "📇",
-    title: "Centralized catalog",
-    body: "Keep every device — laptops, phones, TVs, appliances — in one organized place with full purchase details.",
-  },
-  {
-    icon: "⏰",
-    title: "Expiry alerts",
-    body: "See at a glance which warranties are active, expiring within 30 days, or already lapsed.",
-  },
-  {
-    icon: "🧭",
-    title: "Warranty timeline",
-    body: "Track the full lifecycle of each device: purchase, registration, claims, repairs, and expiry.",
-  },
-  {
-    icon: "🔍",
-    title: "Powerful search & filter",
-    body: "Find any device instantly by name, brand, or serial — then filter and sort by status or category.",
-  },
-  {
-    icon: "📝",
-    title: "Notes & details",
-    body: "Attach notes, retailer info, and receipts so everything you need is one click away.",
-  },
-  {
-    icon: "🔒",
-    title: "Secure & private",
-    body: "Your data is protected behind authentication, accessible only to you.",
-  },
-];
-
-function Features() {
-  return (
-    <section id="features" className="border-t border-white/5 py-24">
-      <div className="mx-auto max-w-6xl px-5">
-        <div className="mx-auto max-w-2xl text-center">
-          <h2 className="text-3xl font-bold md:text-4xl">
-            Everything you need to stay covered
-          </h2>
-          <p className="mt-4 text-zinc-400">
-            Managing devices and warranties shouldn&apos;t mean digging through
-            emails and drawers. Pluto brings it all together.
-          </p>
-        </div>
-        <div className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {FEATURES.map((f) => (
-            <div
-              key={f.title}
-              className="rounded-xl border border-white/10 bg-zinc-900/40 p-6 transition-colors hover:border-primary/40"
-            >
-              <div className="mb-4 grid size-11 place-items-center rounded-lg bg-white/5 text-2xl">
-                {f.icon}
-              </div>
-              <h3 className="text-lg font-semibold">{f.title}</h3>
-              <p className="mt-2 text-sm text-zinc-400">{f.body}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-const STATS = [
-  ["12,000+", "Devices tracked"],
-  ["$8.4M", "Warranties monitored"],
-  ["98%", "On-time renewals"],
-  ["30 days", "Early expiry warnings"],
+const STATS: [string, string][] = [
+  ["12000", "Devices tracked"],
+  ["8400000", "Warranties monitored ($)"],
+  ["98", "On-time renewals (%)"],
+  ["30", "Day early warnings"],
 ];
 
 function Stats() {
   return (
     <section
       id="stats"
-      className="border-t border-white/5 bg-gradient-to-b from-zinc-900/40 to-transparent py-24"
+      className="relative border-t border-white/5 bg-zinc-950/40 py-28 backdrop-blur-sm"
     >
-      <div className="mx-auto max-w-6xl px-5">
-        <div className="grid gap-8 text-center sm:grid-cols-2 lg:grid-cols-4">
-          {STATS.map(([value, label]) => (
-            <div key={label}>
-              <p className="bg-gradient-to-r from-primary to-purple-400 bg-clip-text text-4xl font-extrabold text-transparent md:text-5xl">
-                {value}
-              </p>
-              <p className="mt-2 text-sm text-zinc-400">{label}</p>
-            </div>
-          ))}
-        </div>
+      <div className="mx-auto grid max-w-6xl grid-cols-2 gap-10 px-5 text-center lg:grid-cols-4">
+        {STATS.map(([value, label]) => (
+          <CountUp key={label} target={Number(value)} label={label} />
+        ))}
       </div>
     </section>
   );
 }
 
+function CountUp({ target, label }: { target: number; label: string }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const inView = useInView(ref, { once: true, margin: "-20% 0px" });
+  const [display, setDisplay] = useState(0);
+
+  useEffect(() => {
+    if (!inView) return;
+    const controls = animate(0, target, {
+      duration: 1.4,
+      ease: [0.22, 1, 0.36, 1],
+      onUpdate: (v) => setDisplay(v),
+    });
+    return () => controls.stop();
+  }, [inView, target]);
+
+  return (
+    <div ref={ref}>
+      <p className="bg-gradient-to-r from-primary to-purple-300 bg-clip-text font-display text-5xl font-bold text-transparent md:text-6xl">
+        {formatCompact(display)}
+      </p>
+      <p className="mt-2 font-mono text-xs uppercase tracking-wider text-zinc-400">
+        {label}
+      </p>
+    </div>
+  );
+}
+
+function formatCompact(n: number): string {
+  const v = Math.round(n);
+  if (v >= 1_000_000) return `${(v / 1_000_000).toFixed(1)}M`;
+  if (v >= 1_000) return `${Math.round(v / 1_000)}k`;
+  return String(v);
+}
+
 function CallToAction() {
   return (
-    <section className="border-t border-white/5 py-24">
-      <div className="mx-auto max-w-4xl px-5">
+    <section className="relative px-5 py-28">
+      <div className="mx-auto max-w-4xl">
         <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-primary/20 via-purple-500/10 to-transparent p-10 text-center md:p-16">
-          <h2 className="text-3xl font-bold md:text-4xl">
-            Take control of your warranties today
+          <h2 className="font-display text-4xl leading-tight md:text-5xl">
+            Take control of your warranties.
           </h2>
           <p className="mx-auto mt-4 max-w-xl text-zinc-300">
             Create a free account and start tracking your devices in minutes.
@@ -259,10 +231,12 @@ function CallToAction() {
 
 function Footer() {
   return (
-    <footer className="border-t border-white/5 py-10">
+    <footer className="relative border-t border-white/5 bg-zinc-950 py-10">
       <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-5 text-sm text-zinc-500 sm:flex-row">
         <Logo />
-        <p>© {new Date().getFullYear()} Pluto. Built on the Reno Stack.</p>
+        <p className="font-mono text-xs">
+          © {new Date().getFullYear()} Pluto · Built on the Reno Stack
+        </p>
         <div className="flex gap-6">
           <Link to="/sign-in" className="hover:text-white">
             Sign in
