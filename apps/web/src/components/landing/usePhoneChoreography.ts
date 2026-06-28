@@ -25,7 +25,7 @@ export function usePhoneChoreography(
   const x = useTransform(
     progress,
     [0, 0.1, 0.28, 0.42, 0.55, 1],
-    [0, 0, -3, 3, 0, 0],
+    [0, 0, -4, 4, 0, 0],
     { clamp: true }
   );
   const y = useTransform(progress, [0, 1], [0, 0]);
