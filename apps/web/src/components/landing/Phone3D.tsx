@@ -1,7 +1,7 @@
-import { Canvas, useFrame } from "@react-three/fiber";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { AdaptiveDpr, Preload, useGLTF, useTexture } from "@react-three/drei";
-import type { MotionValue } from "framer-motion";
-import { useLayoutEffect, useMemo, useRef } from "react";
+import { animate, type MotionValue, useMotionValue } from "framer-motion";
+import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 import type { PhoneChoreography } from "./usePhoneChoreography";
 
@@ -49,9 +49,11 @@ const SCREEN_URLS = [
 function PhoneModel({
   choreo,
   progress,
+  reveal,
 }: {
   choreo: PhoneChoreography;
   progress: MotionValue<number>;
+  reveal: MotionValue<number>;
 }) {
   const outer = useRef<THREE.Group>(null);
   const screenRef = useRef<THREE.Mesh>(null);
@@ -125,7 +127,6 @@ function PhoneModel({
 
   // Full list of materials whose opacity we fade each frame (model + overlays).
   const allMats = useRef<THREE.Material[]>([]);
-  const revealStart = useRef<number | null>(null);
 
   useLayoutEffect(() => {
     if (screenMat.current) screenMat.current.map = textures[0];
@@ -143,22 +144,19 @@ function PhoneModel({
     allMats.current = list;
   }, [textures, frameMats]);
 
-  useFrame(({ clock }) => {
+  useFrame(() => {
     const g = outer.current;
     if (!g) return;
     g.position.x = choreo.x.get();
-    g.position.y = choreo.y.get() + Math.sin(clock.elapsedTime) * 0.04;
+    g.position.y = choreo.y.get();
     g.rotation.y = choreo.rotY.get();
     g.rotation.z = choreo.rotZ.get();
     const sc = choreo.scale.get();
     g.scale.set(sc, sc, sc);
 
-    // Initial reveal (time-based, easeOut) × scroll-driven fade — applied to
-    // material opacity so the canvas itself never needs CSS layer compositing.
-    if (revealStart.current === null) revealStart.current = clock.elapsedTime;
-    const t = Math.min((clock.elapsedTime - revealStart.current) / 0.9, 1);
-    const reveal = 1 - Math.pow(1 - t, 3);
-    const opacity = reveal * choreo.opacity.get();
+    // Initial reveal × scroll-driven fade — applied to material opacity so the
+    // canvas itself never needs CSS layer compositing.
+    const opacity = reveal.get() * choreo.opacity.get();
     const mats = allMats.current;
     for (let i = 0; i < mats.length; i++) mats[i].opacity = opacity;
 
@@ -189,6 +187,23 @@ function PhoneModel({
   );
 }
 
+/**
+ * On-demand rendering driver: requests a single frame whenever any animated
+ * value changes (scroll choreography or the reveal). With frameloop="demand"
+ * this means the canvas only redraws while the phone is actually moving —
+ * between those moments the GPU is idle, so the rest of the page's animations
+ * (chapter reveals, count-up, scrolling) don't have to fight it for frames.
+ */
+function InvalidateOnChange({ values }: { values: MotionValue<number>[] }) {
+  const invalidate = useThree((s) => s.invalidate);
+  useEffect(() => {
+    invalidate();
+    const unsubs = values.map((v) => v.on("change", () => invalidate()));
+    return () => unsubs.forEach((u) => u());
+  }, [values, invalidate]);
+  return null;
+}
+
 export default function Phone3D({
   choreo,
   progress,
@@ -198,6 +213,19 @@ export default function Phone3D({
   progress: MotionValue<number>;
   active?: boolean;
 }) {
+  // Reveal the phone on load by easing material opacity 0→1 (see PhoneModel),
+  // driven by a MotionValue so it participates in on-demand invalidation.
+  const reveal = useMotionValue(0);
+  useEffect(() => {
+    const controls = animate(reveal, 1, { duration: 0.9, ease: "easeOut" });
+    return () => controls.stop();
+  }, [reveal]);
+
+  const watched = useMemo(
+    () => [choreo.x, choreo.rotY, choreo.rotZ, choreo.scale, choreo.opacity, reveal],
+    [choreo, reveal]
+  );
+
   // This component only mounts once the lazy chunk + model are loaded (the
   // Suspense boundary lives in Phone3DStage). The reveal + scroll fade are
   // driven on material opacity inside the scene (see PhoneModel) rather than
@@ -210,15 +238,17 @@ export default function Phone3D({
         camera={{ position: [0, 0, 10], fov: 35 }}
         // Let R3F drop resolution under load, then recover when idle.
         performance={{ min: 0.5 }}
-        // Freeze the render loop once the phone has faded out so the canvas
-        // stops competing for frames with the rest of the page's animations.
-        frameloop={active ? "always" : "never"}
+        // Only render when something actually animates (and never once the
+        // phone has fully faded out), so the canvas stops competing for frames
+        // with the rest of the page's animations.
+        frameloop={active ? "demand" : "never"}
         style={{ width: "100%", height: "100%" }}
       >
         <ambientLight intensity={0.7} />
         <directionalLight position={[3, 4, 5]} intensity={2.2} />
         <pointLight color="#ec4899" position={[-4, -2, -3]} intensity={3} />
-        <PhoneModel choreo={choreo} progress={progress} />
+        <PhoneModel choreo={choreo} progress={progress} reveal={reveal} />
+        <InvalidateOnChange values={watched} />
         <Preload all />
         <AdaptiveDpr />
       </Canvas>
