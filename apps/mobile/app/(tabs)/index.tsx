@@ -59,7 +59,7 @@ export default function DeviceListScreen() {
           onPress={() => sheetRef.current?.present()}
           className="mr-1 size-9 items-center justify-center rounded-full bg-primary active:opacity-80"
         >
-          <Plus color="#09090b" size={20} />
+          <Plus color="#222222" size={20} />
         </Pressable>
       ),
     });
@@ -100,7 +100,7 @@ export default function DeviceListScreen() {
 
       {isPending ? (
         <View className="flex-1 items-center justify-center">
-          <ActivityIndicator color="#e879b9" />
+          <ActivityIndicator color="#00DE6F" />
         </View>
       ) : isError ? (
         <View className="flex-1 items-center justify-center px-6">
@@ -116,7 +116,7 @@ export default function DeviceListScreen() {
             <RefreshControl
               refreshing={isRefetching}
               onRefresh={refetch}
-              tintColor="#e879b9"
+              tintColor="#00DE6F"
             />
           }
           ListEmptyComponent={

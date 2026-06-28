@@ -39,7 +39,7 @@ export const CreateDeviceSheet = forwardRef<BottomSheetModal>((_props, ref) => {
       snapPoints={["90%"]}
       enablePanDownToClose
       backdropComponent={renderBackdrop}
-      backgroundStyle={{ backgroundColor: "#18181b" }}
+      backgroundStyle={{ backgroundColor: "#2b2b2b" }}
       handleIndicatorStyle={{ backgroundColor: "#52525b" }}
     >
       <BottomSheetScrollView contentContainerClassName="px-5 pb-10">

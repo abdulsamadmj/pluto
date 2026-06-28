@@ -6,11 +6,11 @@ module.exports = {
     extend: {
       colors: {
         // Mirror the web app's palette so the brand feels consistent.
-        bg: "#09090b", // zinc-950
-        card: "#18181b", // zinc-900
-        border: "#27272a", // zinc-800
-        muted: "#a1a1aa", // zinc-400
-        primary: "#e879b9", // magenta accent
+        bg: "#222222", // base background
+        card: "#2b2b2b", // surface
+        border: "#3a3a3a",
+        muted: "#a1a1aa",
+        primary: "#00DE6F", // Pluto green
       },
     },
   },

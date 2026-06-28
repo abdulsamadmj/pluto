@@ -50,7 +50,7 @@ export default function DeviceDetailsScreen() {
   if (isPending) {
     return (
       <View className="flex-1 items-center justify-center bg-bg">
-        <ActivityIndicator color="#e879b9" />
+        <ActivityIndicator color="#00DE6F" />
       </View>
     );
   }

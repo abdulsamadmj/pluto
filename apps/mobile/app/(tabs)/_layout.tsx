@@ -9,7 +9,7 @@ export default function TabsLayout() {
   if (isInitialPending) {
     return (
       <View className="flex-1 items-center justify-center bg-bg">
-        <ActivityIndicator color="#e879b9" />
+        <ActivityIndicator color="#00DE6F" />
       </View>
     );
   }
@@ -21,12 +21,12 @@ export default function TabsLayout() {
   return (
     <Tabs
       screenOptions={{
-        headerStyle: { backgroundColor: "#09090b" },
+        headerStyle: { backgroundColor: "#222222" },
         headerTintColor: "#fafafa",
-        tabBarStyle: { backgroundColor: "#09090b", borderTopColor: "#27272a" },
-        tabBarActiveTintColor: "#e879b9",
+        tabBarStyle: { backgroundColor: "#222222", borderTopColor: "#3a3a3a" },
+        tabBarActiveTintColor: "#00DE6F",
         tabBarInactiveTintColor: "#71717a",
-        sceneStyle: { backgroundColor: "#09090b" },
+        sceneStyle: { backgroundColor: "#222222" },
       }}
     >
       <Tabs.Screen

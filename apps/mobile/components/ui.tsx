@@ -55,7 +55,7 @@ export function Button({
       className={`${base} ${variants[variant]} ${disabled || loading ? "opacity-50" : ""}`}
     >
       {loading ? (
-        <ActivityIndicator color={variant === "primary" ? "#09090b" : "#e4e4e7"} />
+        <ActivityIndicator color={variant === "primary" ? "#222222" : "#e4e4e7"} />
       ) : typeof children === "string" ? (
         <Text className={`text-base font-semibold ${textColor[variant]}`}>
           {children}
