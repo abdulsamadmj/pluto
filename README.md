@@ -1,4 +1,4 @@
-# Warrantly — Warranty & Device Tracker
+# Pluto — Warranty & Device Tracker
 
 A full-stack web application for cataloging electronic devices, tracking warranty
 coverage, and getting ahead of upcoming expirations from a centralized dashboard.

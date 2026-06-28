@@ -1,8 +1,8 @@
 import type { ExpoConfig } from "expo/config";
 
 const config: ExpoConfig = {
-  name: "Warrantly",
-  slug: "warrantly",
+  name: "Pluto",
+  slug: "pluto",
   scheme: "warranty", // deep-link scheme — must match server auth trustedOrigins/CORS
   version: "1.0.0",
   orientation: "portrait",
@@ -10,10 +10,10 @@ const config: ExpoConfig = {
   newArchEnabled: true,
   ios: {
     supportsTablet: true,
-    bundleIdentifier: "com.smileox.warrantly",
+    bundleIdentifier: "com.smileox.pluto",
   },
   android: {
-    package: "com.smileox.warrantly",
+    package: "com.smileox.pluto",
   },
   web: {
     bundler: "metro",

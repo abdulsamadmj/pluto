@@ -24,7 +24,7 @@ function Logo() {
       <span className="grid size-8 place-items-center rounded-lg bg-gradient-to-br from-primary to-purple-500 text-base">
         🛡️
       </span>
-      <span className="text-lg tracking-tight">Warrantly</span>
+      <span className="text-lg tracking-tight">Pluto</span>
     </Link>
   );
 }
@@ -186,7 +186,7 @@ function Features() {
           </h2>
           <p className="mt-4 text-zinc-400">
             Managing devices and warranties shouldn&apos;t mean digging through
-            emails and drawers. Warrantly brings it all together.
+            emails and drawers. Pluto brings it all together.
           </p>
         </div>
         <div className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -262,7 +262,7 @@ function Footer() {
     <footer className="border-t border-white/5 py-10">
       <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-5 text-sm text-zinc-500 sm:flex-row">
         <Logo />
-        <p>© {new Date().getFullYear()} Warrantly. Built on the Reno Stack.</p>
+        <p>© {new Date().getFullYear()} Pluto. Built on the Reno Stack.</p>
         <div className="flex gap-6">
           <Link to="/sign-in" className="hover:text-white">
             Sign in

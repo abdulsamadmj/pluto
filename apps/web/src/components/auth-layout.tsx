@@ -25,19 +25,19 @@ export function AuthLayout({
           <span className="grid size-8 place-items-center rounded-lg bg-gradient-to-br from-primary to-purple-500">
             🛡️
           </span>
-          <span className="text-lg">Warrantly</span>
+          <span className="text-lg">Pluto</span>
         </Link>
         <div className="relative">
           <h2 className="max-w-sm text-3xl font-bold leading-tight">
             Track every device&apos;s warranty in one place.
           </h2>
           <p className="mt-4 max-w-sm text-zinc-400">
-            Stop losing receipts and missing expiry dates. Warrantly keeps your
+            Stop losing receipts and missing expiry dates. Pluto keeps your
             coverage organized and visible.
           </p>
         </div>
         <p className="relative text-sm text-zinc-500">
-          © {new Date().getFullYear()} Warrantly
+          © {new Date().getFullYear()} Pluto
         </p>
       </div>
 
@@ -49,7 +49,7 @@ export function AuthLayout({
               <span className="grid size-8 place-items-center rounded-lg bg-gradient-to-br from-primary to-purple-500">
                 🛡️
               </span>
-              <span className="text-lg">Warrantly</span>
+              <span className="text-lg">Pluto</span>
             </Link>
           </div>
           <h1 className="text-2xl font-bold">{title}</h1>

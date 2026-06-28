@@ -31,7 +31,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             <span className="grid size-8 place-items-center rounded-lg bg-gradient-to-br from-primary to-purple-500">
               🛡️
             </span>
-            <span className="text-lg tracking-tight">Warrantly</span>
+            <span className="text-lg tracking-tight">Pluto</span>
           </Link>
           <div className="flex items-center gap-3">
             {session?.user && (
