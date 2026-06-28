@@ -39,8 +39,21 @@ export function Phone3DStage({ progress }: { progress: MotionValue<number> }) {
     setActive((prev) => (prev === next ? prev : next));
   });
 
+  // The phone floats ABOVE the page content through the early chapters, then
+  // drops behind once it reaches the chapter-04 app section (≈50% scroll) so
+  // the "Now on mobile" content sits in front of it.
+  const [onTop, setOnTop] = useState(true);
+  useMotionValueEvent(progress, "change", (v) => {
+    const next = v < 0.5;
+    setOnTop((prev) => (prev === next ? prev : next));
+  });
+
   return (
-    <div className="pointer-events-none fixed inset-0 z-0 flex items-center justify-center">
+    <div
+      className={`pointer-events-none fixed inset-0 flex items-center justify-center ${
+        onTop ? "z-30" : "z-0"
+      }`}
+    >
       {canRender3D ? (
         <Suspense fallback={null}>
           <div className="h-[80vh] w-full">
