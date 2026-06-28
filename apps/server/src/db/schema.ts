@@ -1,11 +1,13 @@
 import { relations } from "drizzle-orm";
 import {
+  boolean,
   integer,
   pgTable,
   text,
   timestamp,
   uuid,
 } from "drizzle-orm/pg-core";
+import { user } from "./auth-schema";
 
 export * from "./auth-schema";
 
@@ -59,6 +61,33 @@ export const deviceRelations = relations(device, ({ many }) => ({
 export const warrantyEventRelations = relations(warrantyEvent, ({ one }) => ({
   device: one(device, {
     fields: [warrantyEvent.deviceId],
+    references: [device.id],
+  }),
+}));
+
+/**
+ * Per-user notifications. Unlike devices (global), these are scoped to a user so
+ * read/unread state is personal. Warranty alerts (expiring_soon / expired) are
+ * generated lazily from the device set per user — see notifications.service.
+ */
+export const notification = pgTable("notification", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  type: text("type").notNull(), // "expiring_soon" | "expired"
+  title: text("title").notNull(),
+  body: text("body"),
+  deviceId: uuid("device_id").references(() => device.id, {
+    onDelete: "cascade",
+  }),
+  read: boolean("read").notNull().default(false),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const notificationRelations = relations(notification, ({ one }) => ({
+  device: one(device, {
+    fields: [notification.deviceId],
     references: [device.id],
   }),
 }));

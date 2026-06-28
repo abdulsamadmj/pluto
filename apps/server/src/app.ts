@@ -4,6 +4,7 @@ import { cors } from "hono/cors";
 import { env } from "../env";
 import { auth, type HonoAppContext } from "./auth";
 import { devices } from "./routes/devices";
+import { notifications } from "./routes/notifications";
 import { stats } from "./routes/stats";
 
 const app = new Hono<HonoAppContext>()
@@ -70,7 +71,8 @@ const app = new Hono<HonoAppContext>()
   })
   .get("/health", (c) => c.json({ status: "ok" }, 200))
   .route("/devices", devices)
-  .route("/stats", stats);
+  .route("/stats", stats)
+  .route("/notifications", notifications);
 
 export default app;
 
