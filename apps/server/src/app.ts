@@ -13,7 +13,8 @@ const app = new Hono<HonoAppContext>()
   .use(
     "*",
     cors({
-      origin: [env.WEB_URL],
+      // "warranty://" is the Expo app's Origin on native requests.
+      origin: [env.WEB_URL, "warranty://"],
       allowHeaders: ["Content-Type", "Authorization"],
       allowMethods: ["POST", "GET", "PATCH", "DELETE", "OPTIONS"],
       exposeHeaders: ["Content-Length"],

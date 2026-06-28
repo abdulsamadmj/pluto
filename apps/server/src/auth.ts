@@ -1,10 +1,16 @@
+import { expo } from "@better-auth/expo";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { env } from "../env";
 import { db } from "./db/index";
 import * as schema from "./db/schema";
 
-export const auth = betterAuth({
+// Deep-link scheme used by the Expo app (must match apps/mobile app.config.ts).
+const MOBILE_SCHEME = "warranty://";
+
+// Explicit annotation: the expo() plugin makes the inferred type reference
+// pnpm-internal paths (zod/better-call), which TS can't emit portably (TS2742).
+export const auth: ReturnType<typeof betterAuth> = betterAuth({
   database: drizzleAdapter(db, {
     provider: "pg",
     schema,
@@ -19,7 +25,9 @@ export const auth = betterAuth({
       console.log(`[mock email] password reset link: ${url} (token: ${token})`);
     },
   },
-  trustedOrigins: [env.WEB_URL],
+  // Enables native (Expo) clients: bearer-token sessions + deep-link callbacks.
+  plugins: [expo()],
+  trustedOrigins: [env.WEB_URL, MOBILE_SCHEME],
 });
 
 type AuthStatus =
