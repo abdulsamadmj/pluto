@@ -59,7 +59,7 @@ export default function DeviceListScreen() {
           onPress={() => sheetRef.current?.present()}
           className="mr-1 size-9 items-center justify-center rounded-full bg-primary active:opacity-80"
         >
-          <Plus color="#222222" size={20} />
+          <Plus color="#181818" size={20} />
         </Pressable>
       ),
     });

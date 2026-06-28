@@ -6,9 +6,9 @@ module.exports = {
     extend: {
       colors: {
         // Mirror the web app's palette so the brand feels consistent.
-        bg: "#222222", // base background
-        card: "#2b2b2b", // surface
-        border: "#3a3a3a",
+        bg: "#181818", // base background
+        card: "#202020", // surface
+        border: "#303030",
         muted: "#a1a1aa",
         primary: "#00DE6F", // Pluto green
       },
