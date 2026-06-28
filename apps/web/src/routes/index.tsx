@@ -96,7 +96,7 @@ function Logo() {
 
 function MarketingNav() {
   return (
-    <header className="fixed inset-x-0 top-0 z-40 border-b border-white/5 bg-zinc-950/70 backdrop-blur">
+    <header className="fixed inset-x-0 top-0 z-40 border-b border-white/5 bg-zinc-950/90">
       <nav className="mx-auto flex max-w-6xl items-center justify-between px-5 py-4">
         <Logo />
         <div className="hidden items-center gap-8 font-mono text-xs uppercase tracking-wider text-zinc-400 md:flex">
@@ -173,7 +173,7 @@ function Stats() {
   return (
     <section
       id="stats"
-      className="relative border-t border-white/5 bg-zinc-950/40 py-28 backdrop-blur-sm"
+      className="relative border-t border-white/5 bg-zinc-950 py-28"
     >
       <div className="mx-auto grid max-w-6xl grid-cols-2 gap-10 px-5 text-center lg:grid-cols-4">
         {STATS.map(([value, label]) => (
