@@ -9,7 +9,7 @@ import { StoreBadges } from "./StoreBadges";
  */
 export function MobileLanding() {
   return (
-    <div className="relative flex h-[100dvh] flex-col overflow-hidden bg-[#222222] px-6 text-zinc-50">
+    <div className="relative flex h-[100dvh] flex-col overflow-hidden bg-[#181818] px-6 text-zinc-50">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(600px_400px_at_50%_0%,rgba(0,222,111,0.18),transparent),radial-gradient(500px_300px_at_50%_100%,rgba(0,222,111,0.16),transparent)]" />
 
       {/* Logo */}

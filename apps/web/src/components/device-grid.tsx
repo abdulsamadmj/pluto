@@ -43,7 +43,7 @@ function DeviceCard({ device: d }: { device: DeviceListItem }) {
   return (
     <motion.div
       variants={item}
-      className="group flex flex-col rounded-xl border border-white/10 bg-[#2b2b2b]/40 p-5 transition-colors hover:border-primary/40"
+      className="group flex flex-col rounded-xl border border-white/10 bg-[#202020]/40 p-5 transition-colors hover:border-primary/40"
     >
       <div className="flex items-start justify-between gap-3">
         <div className="grid size-11 shrink-0 place-items-center rounded-lg bg-white/5 text-zinc-300">

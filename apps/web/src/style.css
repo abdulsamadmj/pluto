@@ -66,25 +66,25 @@ body {
   }
 
   .dark {
-    /* Pluto dark theme — base #222222, primary #00DE6F. */
-    --background: 0 0% 13.3%;
+    /* Pluto dark theme — base #181818, primary #00DE6F. */
+    --background: 0 0% 9.4%;
     --foreground: 0 0% 98%;
-    --card: 0 0% 16.5%;
+    --card: 0 0% 12.5%;
     --card-foreground: 0 0% 98%;
-    --popover: 0 0% 16.5%;
+    --popover: 0 0% 12.5%;
     --popover-foreground: 0 0% 98%;
     --primary: 150 100% 43.5%;
     --primary-foreground: 0 0% 8%;
-    --secondary: 0 0% 20%;
+    --secondary: 0 0% 16%;
     --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 20%;
+    --muted: 0 0% 16%;
     --muted-foreground: 0 0% 64%;
-    --accent: 0 0% 20%;
+    --accent: 0 0% 16%;
     --accent-foreground: 0 0% 98%;
     --destructive: 0 62.8% 40%;
     --destructive-foreground: 0 85.7% 97.3%;
-    --border: 0 0% 26%;
-    --input: 0 0% 26%;
+    --border: 0 0% 18.8%;
+    --input: 0 0% 18.8%;
     --ring: 150 100% 43.5%;
   }
 }

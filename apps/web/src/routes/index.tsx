@@ -37,7 +37,7 @@ function DesktopLanding() {
 
   return (
     <MotionConfig reducedMotion="user">
-      <div ref={pageRef} className="relative min-h-screen bg-[#222222] text-zinc-50">
+      <div ref={pageRef} className="relative min-h-screen bg-[#181818] text-zinc-50">
         <MarketingNav />
         <Phone3DStage progress={scrollYProgress} />
         <ScrollProgressRail progress={scrollYProgress} />
@@ -96,7 +96,7 @@ function Logo() {
 
 function MarketingNav() {
   return (
-    <header className="fixed inset-x-0 top-0 z-40 border-b border-white/5 bg-[#222222]/90">
+    <header className="fixed inset-x-0 top-0 z-40 border-b border-white/5 bg-[#181818]/90">
       <nav className="mx-auto flex max-w-6xl items-center justify-between px-5 py-4">
         <Logo />
         <div className="hidden items-center gap-8 font-mono text-xs uppercase tracking-wider text-zinc-400 md:flex">
@@ -173,7 +173,7 @@ function Stats() {
   return (
     <section
       id="stats"
-      className="relative border-t border-white/5 bg-[#222222] py-28"
+      className="relative border-t border-white/5 bg-[#181818] py-28"
     >
       <div className="mx-auto grid max-w-6xl grid-cols-2 gap-10 px-5 text-center lg:grid-cols-4">
         {STATS.map(([value, label]) => (
@@ -246,7 +246,7 @@ function CallToAction() {
 
 function Footer() {
   return (
-    <footer className="relative border-t border-white/5 bg-[#222222] py-10">
+    <footer className="relative border-t border-white/5 bg-[#181818] py-10">
       <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-5 text-sm text-zinc-500 sm:flex-row">
         <Logo />
         <p className="font-mono text-xs">

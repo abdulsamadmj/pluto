@@ -117,7 +117,7 @@ function DeviceProfile({ device }: { device: DeviceDetail }) {
       </div>
 
       {/* Expiry highlight */}
-      <div className="rounded-xl border border-white/10 bg-[#2b2b2b]/40 p-6">
+      <div className="rounded-xl border border-white/10 bg-[#202020]/40 p-6">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
             <p className="text-sm text-zinc-400">Warranty status</p>
@@ -175,7 +175,7 @@ function InfoCard({
   children: React.ReactNode;
 }) {
   return (
-    <div className="rounded-xl border border-white/10 bg-[#2b2b2b]/40 p-5">
+    <div className="rounded-xl border border-white/10 bg-[#202020]/40 p-5">
       <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-zinc-500">
         {title}
       </h3>
@@ -209,7 +209,7 @@ function Timeline({
   events: { id: string; date: string; type: string; title: string; description?: string | null }[];
 }) {
   return (
-    <div className="rounded-xl border border-white/10 bg-[#2b2b2b]/40 p-5">
+    <div className="rounded-xl border border-white/10 bg-[#202020]/40 p-5">
       <h3 className="mb-4 text-sm font-semibold uppercase tracking-wide text-zinc-500">
         Warranty timeline
       </h3>
@@ -264,7 +264,7 @@ function NotesSection({
   const dirty = notes !== initialNotes;
 
   return (
-    <div className="rounded-xl border border-white/10 bg-[#2b2b2b]/40 p-5">
+    <div className="rounded-xl border border-white/10 bg-[#202020]/40 p-5">
       <h3 className="mb-4 text-sm font-semibold uppercase tracking-wide text-zinc-500">
         Notes
       </h3>

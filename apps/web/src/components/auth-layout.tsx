@@ -17,7 +17,7 @@ export function AuthLayout({
   footer?: ReactNode;
 }) {
   return (
-    <div className="grid min-h-screen bg-[#222222] text-zinc-50 lg:grid-cols-2">
+    <div className="grid min-h-screen bg-[#181818] text-zinc-50 lg:grid-cols-2">
       {/* Brand / marketing panel */}
       <div className="relative hidden flex-col justify-between overflow-hidden p-10 lg:flex">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(800px_400px_at_20%_10%,rgba(0,222,111,0.25),transparent),radial-gradient(600px_300px_at_80%_80%,rgba(16,185,129,0.18),transparent)]" />
