@@ -1,8 +1,21 @@
-import { createDeviceSchema, deviceCategories } from "@repo/validators";
-import { Check, FileUp } from "lucide-react-native";
+import {
+  createDeviceSchema,
+  deviceCategories,
+  type ScanExtraction,
+} from "@repo/validators";
+import * as ImagePicker from "expo-image-picker";
+import {
+  Camera,
+  Check,
+  FileUp,
+  Image as ImageIcon,
+  Paperclip,
+  ScanLine,
+} from "lucide-react-native";
 import { useState } from "react";
-import { Pressable, ScrollView, Text, View } from "react-native";
+import { Alert, Image, Pressable, ScrollView, Text, View } from "react-native";
 import Animated, { FadeIn } from "react-native-reanimated";
+import { scanWarrantyCard, uploadDocument } from "../lib/scan";
 import { Button, Field, Input } from "./ui";
 
 // NOTE: DeviceForm renders a plain View — the parent supplies the scroll
@@ -21,6 +34,8 @@ export type DeviceFormValues = {
   warrantyMonths: string;
   warrantyProvider: string;
   notes: string;
+  // R2 object key of a scanned card image, set when added via the scan flow.
+  warrantyCardKey?: string;
 };
 
 export function toDateInput(value: string | Date): string {
@@ -40,37 +55,71 @@ export function emptyDeviceForm(): DeviceFormValues {
     warrantyMonths: "12",
     warrantyProvider: "Manufacturer Warranty",
     notes: "",
+    warrantyCardKey: undefined,
   };
 }
 
-const STEPS = ["Details", "Warranty", "Documents"] as const;
-const STEP_FIELDS: (keyof DeviceFormValues)[][] = [
-  ["name", "brand", "category", "model", "serialNumber"],
-  ["purchaseDate", "purchasePrice", "retailer", "warrantyMonths", "warrantyProvider", "notes"],
-  [],
-];
+/**
+ * Folds OCR-extracted fields onto the empty form. Only fields the model could
+ * read overwrite the defaults; nulls are ignored. Numbers/dates are stringified
+ * to match the mobile form's all-string value shape.
+ */
+export function mergeExtracted(extracted: ScanExtraction): DeviceFormValues {
+  const base = emptyDeviceForm();
+  if (extracted.name) base.name = extracted.name;
+  if (extracted.brand) base.brand = extracted.brand;
+  if (extracted.category) base.category = extracted.category;
+  if (extracted.model) base.model = extracted.model;
+  if (extracted.serialNumber) base.serialNumber = extracted.serialNumber;
+  if (extracted.purchaseDate) base.purchaseDate = toDateInput(extracted.purchaseDate);
+  if (extracted.purchasePrice != null) base.purchasePrice = String(extracted.purchasePrice);
+  if (extracted.retailer) base.retailer = extracted.retailer;
+  if (extracted.warrantyMonths != null) base.warrantyMonths = String(extracted.warrantyMonths);
+  if (extracted.warrantyProvider) base.warrantyProvider = extracted.warrantyProvider;
+  return base;
+}
+
+type StepName = "Scan" | "Details" | "Warranty" | "Documents";
+
+const STEP_FIELDS: Record<StepName, (keyof DeviceFormValues)[]> = {
+  Scan: [],
+  Details: ["name", "brand", "category", "model", "serialNumber"],
+  Warranty: ["purchaseDate", "purchasePrice", "retailer", "warrantyMonths", "warrantyProvider", "notes"],
+  Documents: [],
+};
 
 export function DeviceForm({
   initial,
   submitLabel,
   loading,
   onSubmit,
+  showScan = true,
 }: {
   initial: DeviceFormValues;
   submitLabel: string;
   loading?: boolean;
   onSubmit: (values: ReturnType<typeof createDeviceSchema.parse>) => void;
+  /** Show the camera/OCR scan step first. Off for the edit form. */
+  showScan?: boolean;
 }) {
   const [values, setValues] = useState<DeviceFormValues>(initial);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const steps: StepName[] = showScan
+    ? ["Scan", "Details", "Warranty", "Documents"]
+    : ["Details", "Warranty", "Documents"];
   const [step, setStep] = useState(0);
+  const [scanning, setScanning] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [previewUri, setPreviewUri] = useState<string | null>(null);
+
+  const current = steps[step];
 
   const set = (key: keyof DeviceFormValues, v: string) =>
     setValues((prev) => ({ ...prev, [key]: v }));
 
   // Validate only the current step's fields before advancing.
-  const validateStep = (index: number) => {
-    const fields = STEP_FIELDS[index];
+  const validateStep = (name: StepName) => {
+    const fields = STEP_FIELDS[name];
     if (fields.length === 0) return true;
     const shape = Object.fromEntries(fields.map((f) => [f, true]));
     const parsed = createDeviceSchema
@@ -90,7 +139,90 @@ export function DeviceForm({
   };
 
   const goNext = () => {
-    if (validateStep(step)) setStep((s) => Math.min(s + 1, STEPS.length - 1));
+    if (validateStep(current)) setStep((s) => Math.min(s + 1, steps.length - 1));
+  };
+
+  const runScan = async (asset: ImagePicker.ImagePickerAsset) => {
+    setPreviewUri(asset.uri);
+    setScanning(true);
+    try {
+      const { key, extracted } = await scanWarrantyCard({
+        uri: asset.uri,
+        mimeType: asset.mimeType,
+        fileName: asset.fileName,
+      });
+      // Prefill detected fields; keep the rest for the user. Stash the R2 key.
+      setValues({ ...mergeExtracted(extracted), warrantyCardKey: key });
+      const found = Object.values(extracted).filter(
+        (v) => v !== null && v !== undefined
+      ).length;
+      Alert.alert(
+        "Scan complete",
+        found > 0
+          ? `Prefilled ${found} field${found === 1 ? "" : "s"}. Review the rest before saving.`
+          : "Image saved, but we couldn't read any fields. Please fill them in."
+      );
+      setStep(1); // advance to the first non-scan step
+    } catch {
+      Alert.alert("Scan failed", "Couldn't read that image. Try again or enter details manually.");
+    } finally {
+      setScanning(false);
+    }
+  };
+
+  const pickFromCamera = async () => {
+    const perm = await ImagePicker.requestCameraPermissionsAsync();
+    if (!perm.granted) {
+      Alert.alert("Camera access needed", "Enable camera access to scan a card.");
+      return;
+    }
+    const result = await ImagePicker.launchCameraAsync({ quality: 0.7 });
+    if (!result.canceled) void runScan(result.assets[0]);
+  };
+
+  const pickFromLibrary = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      quality: 0.7,
+    });
+    if (!result.canceled) void runScan(result.assets[0]);
+  };
+
+  // Documents step: attach an image to R2 without OCR.
+  const attachDocument = async (asset: ImagePicker.ImagePickerAsset) => {
+    setPreviewUri(asset.uri);
+    setUploading(true);
+    try {
+      const { key } = await uploadDocument({
+        uri: asset.uri,
+        mimeType: asset.mimeType,
+        fileName: asset.fileName,
+      });
+      setValues((prev) => ({ ...prev, warrantyCardKey: key }));
+      Alert.alert("Attached", "Document attached to this device.");
+    } catch {
+      Alert.alert("Upload failed", "Couldn't attach that file. Try again.");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const attachFromCamera = async () => {
+    const perm = await ImagePicker.requestCameraPermissionsAsync();
+    if (!perm.granted) {
+      Alert.alert("Camera access needed", "Enable camera access to attach a photo.");
+      return;
+    }
+    const result = await ImagePicker.launchCameraAsync({ quality: 0.7 });
+    if (!result.canceled) void attachDocument(result.assets[0]);
+  };
+
+  const attachFromLibrary = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      quality: 0.7,
+    });
+    if (!result.canceled) void attachDocument(result.assets[0]);
   };
 
   const submit = () => {
@@ -102,7 +234,9 @@ export function DeviceForm({
         const k = issue.path[0];
         if (typeof k === "string" && !map[k]) {
           map[k] = issue.message;
-          const owner = STEP_FIELDS.findIndex((fs) => fs.includes(k as keyof DeviceFormValues));
+          const owner = steps.findIndex((s) =>
+            STEP_FIELDS[s].includes(k as keyof DeviceFormValues)
+          );
           if (owner >= 0) firstStep = Math.min(firstStep, owner);
         }
       }
@@ -116,10 +250,56 @@ export function DeviceForm({
 
   return (
     <View className="gap-4 pb-8">
-      <Stepper step={step} />
+      <Stepper steps={steps} step={step} />
 
       <Animated.View key={step} entering={FadeIn.duration(220)} className="gap-4">
-        {step === 0 && (
+        {current === "Scan" && (
+          <View className="items-center gap-4 rounded-2xl border border-dashed border-border bg-white/[0.02] py-8">
+            {previewUri ? (
+              <Image
+                source={{ uri: previewUri }}
+                className="h-36 w-48 rounded-xl"
+                resizeMode="contain"
+              />
+            ) : (
+              <View className="size-12 items-center justify-center rounded-full bg-primary/10">
+                <ScanLine size={22} color="#00DE6F" />
+              </View>
+            )}
+            <View className="items-center px-8">
+              <Text className="text-base font-medium text-zinc-200">
+                Scan a warranty card or receipt
+              </Text>
+              <Text className="mt-1 text-center text-sm text-muted">
+                We&apos;ll read the details and fill the form for you. You can edit
+                everything before saving.
+              </Text>
+            </View>
+            <View className="w-full gap-2 px-6">
+              <Button onPress={pickFromCamera} loading={scanning}>
+                <View className="flex-row items-center gap-2">
+                  <Camera size={18} color="#181818" />
+                  <Text className="text-base font-semibold text-zinc-950">
+                    {scanning ? "Scanning…" : "Take a photo"}
+                  </Text>
+                </View>
+              </Button>
+              <Button variant="outline" onPress={pickFromLibrary} disabled={scanning}>
+                <View className="flex-row items-center gap-2">
+                  <ImageIcon size={18} color="#e4e4e7" />
+                  <Text className="text-base font-semibold text-zinc-100">
+                    Choose from library
+                  </Text>
+                </View>
+              </Button>
+              <Button variant="ghost" onPress={() => setStep(1)} disabled={scanning}>
+                Skip — enter manually
+              </Button>
+            </View>
+          </View>
+        )}
+
+        {current === "Details" && (
           <>
             <Field label="Device name" error={errors.name}>
               <Input value={values.name} onChangeText={(v) => set("name", v)} placeholder='MacBook Pro 16"' />
@@ -152,7 +332,7 @@ export function DeviceForm({
           </>
         )}
 
-        {step === 1 && (
+        {current === "Warranty" && (
           <>
             <Field label="Purchase date (YYYY-MM-DD)" error={errors.purchaseDate}>
               <Input value={values.purchaseDate} onChangeText={(v) => set("purchaseDate", v)} placeholder="2025-01-15" />
@@ -175,48 +355,90 @@ export function DeviceForm({
           </>
         )}
 
-        {step === 2 && (
-          <View className="items-center gap-3 rounded-2xl border border-dashed border-border bg-white/[0.02] py-12">
-            <View className="size-12 items-center justify-center rounded-full bg-white/5">
-              <FileUp size={22} color="#a1a1aa" />
-            </View>
-            <Text className="text-base font-medium text-zinc-200">Attach documents</Text>
-            <Text className="px-8 text-center text-sm text-muted">
-              Receipts & warranty cards — you'll be able to upload these soon.
-            </Text>
-            <View className="rounded-full border border-primary/30 bg-primary/10 px-3 py-1">
-              <Text className="text-xs uppercase tracking-wide text-primary">Coming soon</Text>
+        {current === "Documents" && (
+          <View className="items-center gap-4 rounded-2xl border border-dashed border-border bg-white/[0.02] py-8">
+            {values.warrantyCardKey ? (
+              <>
+                {previewUri ? (
+                  <Image
+                    source={{ uri: previewUri }}
+                    className="h-36 w-48 rounded-xl"
+                    resizeMode="contain"
+                  />
+                ) : (
+                  <View className="size-12 items-center justify-center rounded-full bg-primary/10">
+                    <Paperclip size={22} color="#00DE6F" />
+                  </View>
+                )}
+                <View className="flex-row items-center gap-1.5">
+                  <Check size={16} color="#34d399" />
+                  <Text className="text-sm text-emerald-400">Document attached</Text>
+                </View>
+              </>
+            ) : (
+              <>
+                <View className="size-12 items-center justify-center rounded-full bg-white/5">
+                  <FileUp size={22} color="#a1a1aa" />
+                </View>
+                <View className="items-center px-8">
+                  <Text className="text-base font-medium text-zinc-200">Attach a document</Text>
+                  <Text className="mt-1 text-center text-sm text-muted">
+                    Receipt or warranty card photo. Optional.
+                  </Text>
+                </View>
+              </>
+            )}
+            <View className="w-full gap-2 px-6">
+              <Button onPress={attachFromCamera} loading={uploading}>
+                <View className="flex-row items-center gap-2">
+                  <Camera size={18} color="#181818" />
+                  <Text className="text-base font-semibold text-zinc-950">
+                    {values.warrantyCardKey ? "Replace with photo" : "Take a photo"}
+                  </Text>
+                </View>
+              </Button>
+              <Button variant="outline" onPress={attachFromLibrary} disabled={uploading}>
+                <View className="flex-row items-center gap-2">
+                  <ImageIcon size={18} color="#e4e4e7" />
+                  <Text className="text-base font-semibold text-zinc-100">
+                    Choose from library
+                  </Text>
+                </View>
+              </Button>
             </View>
           </View>
         )}
+
       </Animated.View>
 
-      <View className="flex-row gap-3 pt-2">
-        {step > 0 && (
-          <View className="flex-1">
-            <Button variant="outline" onPress={() => setStep((s) => s - 1)}>
-              Back
-            </Button>
-          </View>
-        )}
-        <View className="flex-1">
-          {step < STEPS.length - 1 ? (
-            <Button onPress={goNext}>Next</Button>
-          ) : (
-            <Button onPress={submit} loading={loading}>
-              {`Skip & ${submitLabel.toLowerCase()}`}
-            </Button>
+      {current !== "Scan" && (
+        <View className="flex-row gap-3 pt-2">
+          {step > 0 && (
+            <View className="flex-1">
+              <Button variant="outline" onPress={() => setStep((s) => s - 1)}>
+                Back
+              </Button>
+            </View>
           )}
+          <View className="flex-1">
+            {step < steps.length - 1 ? (
+              <Button onPress={goNext}>Next</Button>
+            ) : (
+              <Button onPress={submit} loading={loading}>
+                {submitLabel}
+              </Button>
+            )}
+          </View>
         </View>
-      </View>
+      )}
     </View>
   );
 }
 
-function Stepper({ step }: { step: number }) {
+function Stepper({ steps, step }: { steps: StepName[]; step: number }) {
   return (
     <View className="flex-row items-center gap-2 pb-1">
-      {STEPS.map((label, i) => {
+      {steps.map((label, i) => {
         const active = i === step;
         const done = i < step;
         return (
@@ -237,7 +459,7 @@ function Stepper({ step }: { step: number }) {
             <Text className={`text-xs ${active ? "text-zinc-100" : "text-muted"}`} numberOfLines={1}>
               {label}
             </Text>
-            {i < STEPS.length - 1 && <View className="h-px flex-1 bg-white/10" />}
+            {i < steps.length - 1 && <View className="h-px flex-1 bg-white/10" />}
           </View>
         );
       })}

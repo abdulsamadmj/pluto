@@ -30,7 +30,20 @@ const config: ExpoConfig = {
     output: "single",
     favicon: "./assets/images/logo.png",
   },
-  plugins: ["expo-router", "expo-secure-store", "./plugins/withFmtConsteval"],
+  plugins: [
+    "expo-router",
+    "expo-secure-store",
+    "./plugins/withFmtConsteval",
+    [
+      "expo-image-picker",
+      {
+        photosPermission:
+          "Pluto needs access to your photos so you can scan a warranty card or receipt.",
+        cameraPermission:
+          "Pluto needs camera access so you can photograph a warranty card or receipt.",
+      },
+    ],
+  ],
   experiments: {
     typedRoutes: true,
   },

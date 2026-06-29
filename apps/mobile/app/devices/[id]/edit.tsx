@@ -58,6 +58,7 @@ export default function EditDeviceScreen() {
           notes: data.notes ?? "",
         }}
         submitLabel="Save changes"
+        showScan={false}
         loading={mutation.isPending}
         onSubmit={(values) => mutation.mutate({ param: { id }, json: values })}
       />
