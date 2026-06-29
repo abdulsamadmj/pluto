@@ -184,7 +184,16 @@ export function DeviceForm({
   return (
     <Form {...form}>
       <form
-        onSubmit={form.handleSubmit((values) => onSubmit(values))}
+        onSubmit={form.handleSubmit((values) => {
+          // A stray Enter / keyboard "Go" in any field submits the whole form.
+          // Only create the device on the final step; otherwise advance, so the
+          // user can't skip the remaining steps (e.g. Documents) by accident.
+          if (step < steps.length - 1) {
+            setStep((s) => Math.min(s + 1, steps.length - 1));
+            return;
+          }
+          onSubmit(values);
+        })}
         className="flex flex-col gap-5"
       >
         <Stepper steps={steps} step={step} />
