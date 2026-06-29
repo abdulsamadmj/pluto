@@ -82,6 +82,7 @@ function buildWhere(params: DeviceQuery, now: Date): SQL | undefined {
 }
 
 const sortColumns = {
+  createdAt: schema.device.createdAt,
   name: schema.device.name,
   brand: schema.device.brand,
   purchaseDate: schema.device.purchaseDate,

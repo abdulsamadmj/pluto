@@ -12,6 +12,7 @@ export type WarrantyStatus = (typeof warrantyStatuses)[number];
 export const EXPIRING_SOON_DAYS = 30;
 
 export const deviceSortFields = [
+  "createdAt",
   "name",
   "brand",
   "purchaseDate",
@@ -19,6 +20,21 @@ export const deviceSortFields = [
   "status",
 ] as const;
 export type DeviceSortField = (typeof deviceSortFields)[number];
+
+/** Human labels for each sort field (shared by the web & mobile sort controls). */
+export const sortLabels: Record<DeviceSortField, string> = {
+  createdAt: "Newly added",
+  name: "Name",
+  brand: "Brand",
+  purchaseDate: "Purchase date",
+  warrantyExpiry: "Warranty expiry",
+  status: "Status",
+};
+
+/** The most natural order for a given sort field (newest/soonest first where it helps). */
+export function defaultOrderFor(sort: DeviceSortField): "asc" | "desc" {
+  return sort === "createdAt" ? "desc" : "asc";
+}
 
 /**
  * Query contract for `GET /devices`. Imported by both the Hono route (to
@@ -30,8 +46,8 @@ export const deviceQuerySchema = z.object({
   status: z.enum(warrantyStatuses).optional(),
   brand: z.string().trim().optional(),
   category: z.string().trim().optional(),
-  sort: z.enum(deviceSortFields).default("warrantyExpiry"),
-  order: z.enum(["asc", "desc"]).default("asc"),
+  sort: z.enum(deviceSortFields).default("createdAt"),
+  order: z.enum(["asc", "desc"]).default("desc"),
   page: z.coerce.number().int().min(1).default(1),
   pageSize: z.coerce.number().int().min(1).max(100).default(10),
 });

@@ -1,4 +1,8 @@
-import type { WarrantyStatus } from "@repo/validators";
+import {
+  defaultOrderFor,
+  type DeviceSortField,
+  type WarrantyStatus,
+} from "@repo/validators";
 import { useQuery } from "@tanstack/react-query";
 import { LayoutGrid, List, Plus } from "lucide-react-native";
 import { useRef, useState } from "react";
@@ -35,14 +39,15 @@ export default function DeviceListScreen() {
 
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState<WarrantyStatus | undefined>(undefined);
+  const [sort, setSort] = useState<DeviceSortField>("createdAt");
   const [page, setPage] = useState(1);
   const [view, setView] = useState<"list" | "grid">("list");
 
   const query = {
     ...(search ? { search } : {}),
     ...(status ? { status } : {}),
-    sort: "warrantyExpiry" as const,
-    order: "asc" as const,
+    sort,
+    order: defaultOrderFor(sort),
     page: String(page),
     pageSize: "10",
   };
@@ -84,8 +89,8 @@ export default function DeviceListScreen() {
           placeholder="Search name, brand, model, serial…"
           autoCapitalize="none"
         />
-        <View className="flex-row items-center gap-2">
-          <View className="flex-1 flex-row gap-2">
+        <View className="flex-row items-start gap-2">
+          <View className="flex-1 flex-row flex-wrap gap-2">
             {STATUS_FILTERS.map((f) => {
               const active = status === f.value;
               return (
@@ -103,6 +108,22 @@ export default function DeviceListScreen() {
                 </Pressable>
               );
             })}
+            {(() => {
+              const active = sort === "createdAt";
+              return (
+                <Pressable
+                  onPress={() => {
+                    setSort(active ? "warrantyExpiry" : "createdAt");
+                    setPage(1);
+                  }}
+                  className={`rounded-full border px-3 py-1.5 ${active ? "border-primary bg-primary/20" : "border-border"}`}
+                >
+                  <Text className={active ? "text-xs text-primary" : "text-xs text-muted"}>
+                    Newly added
+                  </Text>
+                </Pressable>
+              );
+            })()}
           </View>
           <ViewToggle view={view} onChange={setView} />
         </View>

@@ -22,6 +22,7 @@ import {
 } from "@repo/ui/table";
 import { Input } from "@repo/ui/input";
 import {
+  defaultOrderFor,
   deviceQuerySchema,
   type DeviceSortField,
   type WarrantyStatus,
@@ -191,9 +192,20 @@ function DeviceTable() {
     navigate({ search: (p) => ({ ...p, page }) });
   };
 
+  const setSortField = (field: DeviceSortField) => {
+    navigate({
+      search: (p) => ({
+        ...p,
+        sort: field,
+        order: defaultOrderFor(field),
+        page: 1,
+      }),
+    });
+  };
+
   const clearFilters = () => {
     navigate({
-      search: () => ({ sort: "warrantyExpiry", order: "asc", page: 1, pageSize: params.pageSize }),
+      search: () => ({ sort: "createdAt", order: "desc", page: 1, pageSize: params.pageSize }),
     });
   };
 
@@ -234,6 +246,15 @@ function DeviceTable() {
             onChange={(v) => setFilter("category", v)}
             options={(meta?.categories ?? []).map((c) => ({ value: c, label: c }))}
           />
+          <Button
+            variant={params.sort === "createdAt" ? "default" : "outline"}
+            size="sm"
+            onClick={() =>
+              setSortField(params.sort === "createdAt" ? "warrantyExpiry" : "createdAt")
+            }
+          >
+            Newly added
+          </Button>
           {hasFilters && (
             <Button variant="ghost" size="sm" onClick={clearFilters}>
               Clear
