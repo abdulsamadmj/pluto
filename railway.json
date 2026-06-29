@@ -5,7 +5,7 @@
     "buildCommand": "pnpm install --frozen-lockfile"
   },
   "deploy": {
-    "preDeployCommand": "pnpm --filter @repo/server db:push:prod",
+    "preDeployCommand": "pnpm --filter @repo/server db:push:prod && pnpm --filter @repo/server db:seed:prod",
     "startCommand": "pnpm --filter @repo/server start:prod",
     "restartPolicyType": "ON_FAILURE",
     "restartPolicyMaxRetries": 10

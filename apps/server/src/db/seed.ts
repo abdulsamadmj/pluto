@@ -231,6 +231,20 @@ function buildTimeline(deviceId: string, purchaseDate: Date, expiry: Date) {
 }
 
 async function main() {
+  // In deploys we only want to seed an empty database so redeploys don't wipe
+  // data that's accumulated since. Local `db:seed` (without this flag) always
+  // re-seeds for a clean, deterministic dataset.
+  if (process.env.SEED_IF_EMPTY === "true") {
+    const existing = await db
+      .select({ id: schema.device.id })
+      .from(schema.device)
+      .limit(1);
+    if (existing.length > 0) {
+      console.log("Devices already present — skipping seed (SEED_IF_EMPTY).");
+      process.exit(0);
+    }
+  }
+
   console.log("Clearing existing device data…");
   await db.delete(schema.warrantyEvent);
   await db.delete(schema.device);

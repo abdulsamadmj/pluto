@@ -24,7 +24,7 @@
         "db:push": "pnpm with-env drizzle-kit push",
         "db:push:prod": "drizzle-kit push",
         "db:seed": "pnpm with-env tsx src/db/seed.ts",
-        "db:seed:prod": "tsx src/db/seed.ts",
+        "db:seed:prod": "SEED_IF_EMPTY=true tsx src/db/seed.ts",
         "start": "pnpm with-env node dist/src/index.js",
         "start:prod": "tsx src/index.ts",
         "with-env": "dotenv -e ../../.env --",

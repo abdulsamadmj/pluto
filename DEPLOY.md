@@ -28,8 +28,9 @@ tokens and is unaffected by cookie settings.
 2. Railway reads [`railway.json`](./railway.json) automatically:
    - install: `pnpm install --frozen-lockfile` (from the monorepo root, so the
      `workspace:*` packages resolve)
-   - pre-deploy: `pnpm --filter @repo/server db:push:prod` (applies the Drizzle
-     schema to the DB on every deploy)
+   - pre-deploy: `pnpm --filter @repo/server db:push:prod && pnpm --filter @repo/server db:seed:prod`
+     (applies the Drizzle schema, then seeds ~250 demo devices **only if the DB
+     is empty** — redeploys keep existing data)
    - start: `pnpm --filter @repo/server start:prod` (runs the server via `tsx`,
      which transpiles the workspace TypeScript packages at runtime)
 3. Set the service **Variables**:
@@ -51,8 +52,10 @@ tokens and is unaffected by cookie settings.
    (create the CNAME Railway shows you at your DNS provider). `PORT` is injected
    by Railway automatically — the server already reads `process.env.PORT`.
 
-5. (Optional) Seed demo data once: run `pnpm --filter @repo/server db:seed:prod`
-   via `railway run` with `DATABASE_URL` pointed at the prod DB.
+5. Demo data is seeded automatically by the pre-deploy step (idempotent — it
+   only runs when the `device` table is empty). To force a full re-seed, run
+   `pnpm --filter @repo/server db:seed` via `railway run` (no `SEED_IF_EMPTY`),
+   which clears and reinserts the dataset.
 
 ## 3. Web app (Vercel)
 
