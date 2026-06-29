@@ -35,7 +35,10 @@ export function MobileLanding() {
         </p>
 
         <Button asChild size="lg" className="mt-8">
-          <a href="#">
+          <a
+            href="https://github.com/abdulsamadmj/pluto/raw/main/pluto-prod.apk"
+            rel="noopener noreferrer"
+          >
             <Download className="size-4" /> Download the app
           </a>
         </Button>
