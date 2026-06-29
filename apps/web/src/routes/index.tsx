@@ -67,10 +67,10 @@ function DesktopLanding() {
           />
           <Chapter
             index="03"
-            eyebrow="History"
+            eyebrow="Dashboard"
             align="right"
-            title={<>A full warranty timeline.</>}
-            body="Track each device's lifecycle — purchase, registration, claims, repairs, and expiry — at a glance."
+            title={<>Everything at a glance.</>}
+            body="Total devices, active coverage, what's expiring soon, and what's already lapsed — your whole warranty picture on one dashboard."
           />
 
           <MobileAppSection />
