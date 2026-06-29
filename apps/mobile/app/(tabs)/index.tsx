@@ -4,7 +4,7 @@ import {
   type WarrantyStatus,
 } from "@repo/validators";
 import { useQuery } from "@tanstack/react-query";
-import { LayoutGrid, List, Plus } from "lucide-react-native";
+import { CreditCard, LayoutGrid, List, Plus } from "lucide-react-native";
 import { useRef, useState } from "react";
 import {
   ActivityIndicator,
@@ -22,6 +22,7 @@ import {
 import { DeviceCard } from "../../components/device-card";
 import { DeviceListItem } from "../../components/device-list-item";
 import { Input, Muted } from "../../components/ui";
+import { WalletDeck } from "../../components/wallet-deck";
 import {
   deviceMetaQueryOptions,
   devicesQueryOptions,
@@ -41,7 +42,7 @@ export default function DeviceListScreen() {
   const [status, setStatus] = useState<WarrantyStatus | undefined>(undefined);
   const [sort, setSort] = useState<DeviceSortField>("warrantyExpiry");
   const [page, setPage] = useState(1);
-  const [view, setView] = useState<"list" | "grid">("list");
+  const [view, setView] = useState<"wallet" | "grid" | "list">("wallet");
 
   const query = {
     ...(search ? { search } : {}),
@@ -141,24 +142,35 @@ export default function DeviceListScreen() {
         <View className="flex-1 items-center justify-center px-6">
           <Muted>Failed to load devices. Pull to retry.</Muted>
         </View>
-      ) : (
+      ) : data.data.length === 0 ? (
+        <View className="flex-1 items-center justify-center px-6">
+          <Muted>No devices match your filters.</Muted>
+        </View>
+      ) : view === "wallet" ? (
+        <WalletDeck
+          devices={data.data}
+          refreshControl={
+            <RefreshControl
+              refreshing={isRefetching}
+              onRefresh={refetch}
+              tintColor="#00DE6F"
+            />
+          }
+          footer={pager ? <View className="mt-2">{pager}</View> : null}
+        />
+      ) : view === "grid" ? (
         <FlatList
-          // Remount when columns change — FlatList can't switch numColumns live.
-          key={view}
+          key="grid"
           data={data.data}
           keyExtractor={(d) => d.id}
-          numColumns={view === "grid" ? 2 : 1}
-          columnWrapperClassName={view === "grid" ? "gap-3" : undefined}
+          numColumns={2}
+          columnWrapperClassName="gap-3"
           renderItem={({ item, index }) => (
             <Animated.View
               entering={FadeInDown.delay(index * 40).duration(260)}
-              className={view === "grid" ? "flex-1" : undefined}
+              className="flex-1"
             >
-              {view === "grid" ? (
-                <DeviceCard device={item} />
-              ) : (
-                <DeviceListItem device={item} />
-              )}
+              <DeviceCard device={item} />
             </Animated.View>
           )}
           contentContainerClassName="gap-3 px-4 pb-28"
@@ -169,10 +181,25 @@ export default function DeviceListScreen() {
               tintColor="#00DE6F"
             />
           }
-          ListEmptyComponent={
-            <View className="items-center py-20">
-              <Muted>No devices match your filters.</Muted>
-            </View>
+          ListFooterComponent={pager}
+        />
+      ) : (
+        <FlatList
+          key="list"
+          data={data.data}
+          keyExtractor={(d) => d.id}
+          renderItem={({ item, index }) => (
+            <Animated.View entering={FadeInDown.delay(index * 40).duration(260)}>
+              <DeviceListItem device={item} />
+            </Animated.View>
+          )}
+          contentContainerClassName="gap-3 px-4 pb-28"
+          refreshControl={
+            <RefreshControl
+              refreshing={isRefetching}
+              onRefresh={refetch}
+              tintColor="#00DE6F"
+            />
           }
           ListFooterComponent={pager}
         />
@@ -199,18 +226,24 @@ export default function DeviceListScreen() {
   );
 }
 
+const VIEW_ICONS = {
+  wallet: CreditCard,
+  grid: LayoutGrid,
+  list: List,
+} as const;
+
 function ViewToggle({
   view,
   onChange,
 }: {
-  view: "list" | "grid";
-  onChange: (v: "list" | "grid") => void;
+  view: "wallet" | "grid" | "list";
+  onChange: (v: "wallet" | "grid" | "list") => void;
 }) {
   return (
     <View className="flex-row rounded-lg border border-border p-0.5">
-      {(["list", "grid"] as const).map((v) => {
+      {(["wallet", "grid", "list"] as const).map((v) => {
         const active = view === v;
-        const Icon = v === "list" ? List : LayoutGrid;
+        const Icon = VIEW_ICONS[v];
         return (
           <Pressable
             key={v}
