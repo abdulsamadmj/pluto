@@ -92,12 +92,15 @@ export default function DeviceListScreen() {
         <View className="flex-row items-start gap-2">
           <View className="flex-1 flex-row flex-wrap gap-2">
             {STATUS_FILTERS.map((f) => {
-              const active = status === f.value;
+              // Status pills and "Newly added" form one single-select group: a
+              // status is only "active" when we aren't sorting by newest.
+              const active = sort !== "createdAt" && status === f.value;
               return (
                 <Pressable
                   key={f.label}
                   onPress={() => {
                     setStatus(f.value);
+                    setSort("warrantyExpiry");
                     setPage(1);
                   }}
                   className={`rounded-full border px-3 py-1.5 ${active ? "border-primary bg-primary/20" : "border-border"}`}
@@ -113,7 +116,8 @@ export default function DeviceListScreen() {
               return (
                 <Pressable
                   onPress={() => {
-                    setSort(active ? "warrantyExpiry" : "createdAt");
+                    setStatus(undefined);
+                    setSort("createdAt");
                     setPage(1);
                   }}
                   className={`rounded-full border px-3 py-1.5 ${active ? "border-primary bg-primary/20" : "border-border"}`}

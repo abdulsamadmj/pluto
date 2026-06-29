@@ -247,7 +247,7 @@ function DeviceTable() {
             options={(meta?.categories ?? []).map((c) => ({ value: c, label: c }))}
           />
           <Button
-            variant={params.sort === "createdAt" ? "default" : "outline"}
+            variant={params.sort === "createdAt" ? "primary" : "outline"}
             size="sm"
             onClick={() =>
               setSortField(params.sort === "createdAt" ? "warrantyExpiry" : "createdAt")
