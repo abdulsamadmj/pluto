@@ -1,8 +1,10 @@
 import { Link, useRouter } from "expo-router";
 import { useState } from "react";
-import { KeyboardAvoidingView, Platform, Text, View } from "react-native";
+import { Image, KeyboardAvoidingView, Platform, Text, View } from "react-native";
 import { Button, Field, Input } from "../../components/ui";
 import { authClient } from "../../lib/auth-client";
+
+const logo = require("../../assets/images/logo.png");
 
 export default function SignIn() {
   const router = useRouter();
@@ -33,6 +35,10 @@ export default function SignIn() {
       className="flex-1 bg-bg"
     >
       <View className="flex-1 justify-center gap-6 px-6">
+        <View className="flex-row items-center gap-2.5">
+          <Image source={logo} className="size-8 rounded-lg" />
+          <Text className="text-lg font-bold text-zinc-50">Pluto</Text>
+        </View>
         <View className="gap-2">
           <Text className="text-3xl font-bold text-zinc-50">Welcome back</Text>
           <Text className="text-muted">Sign in to your warranty dashboard</Text>
