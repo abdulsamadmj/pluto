@@ -28,7 +28,7 @@ export const device = pgTable("device", {
   model: text("model").notNull(),
   serialNumber: text("serial_number").notNull(),
   purchaseDate: timestamp("purchase_date").notNull(),
-  // Stored in whole currency units (AUD) to keep the demo simple.
+  // Stored in whole currency units (USD) to keep the demo simple.
   purchasePrice: integer("purchase_price").notNull(),
   retailer: text("retailer").notNull(),
   warrantyMonths: integer("warranty_months").notNull(),

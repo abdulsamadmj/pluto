@@ -142,7 +142,7 @@ export function DeviceForm({
               {step === 1 && (
                 <div className="grid gap-4 sm:grid-cols-2">
                   <Field form={form} name="purchaseDate" label="Purchase date" type="date" />
-                  <Field form={form} name="purchasePrice" label="Purchase price (AUD)" type="number" placeholder="1999" />
+                  <Field form={form} name="purchasePrice" label="Purchase price (USD)" type="number" placeholder="1999" />
                   <Field form={form} name="retailer" label="Retailer" placeholder="JB Hi-Fi" />
                   <Field form={form} name="warrantyMonths" label="Warranty length (months)" type="number" placeholder="24" />
                   <Field form={form} name="warrantyProvider" label="Warranty provider" placeholder="AppleCare+" />

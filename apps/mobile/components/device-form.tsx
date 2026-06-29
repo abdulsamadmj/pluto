@@ -157,7 +157,7 @@ export function DeviceForm({
             <Field label="Purchase date (YYYY-MM-DD)" error={errors.purchaseDate}>
               <Input value={values.purchaseDate} onChangeText={(v) => set("purchaseDate", v)} placeholder="2025-01-15" />
             </Field>
-            <Field label="Purchase price (AUD)" error={errors.purchasePrice}>
+            <Field label="Purchase price (USD)" error={errors.purchasePrice}>
               <Input value={values.purchasePrice} onChangeText={(v) => set("purchasePrice", v)} keyboardType="numeric" placeholder="1999" />
             </Field>
             <Field label="Retailer" error={errors.retailer}>

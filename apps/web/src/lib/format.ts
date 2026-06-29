@@ -4,15 +4,15 @@ import {
   type WarrantyStatus,
 } from "@repo/validators";
 
-const dateFmt = new Intl.DateTimeFormat("en-AU", {
+const dateFmt = new Intl.DateTimeFormat("en-US", {
   day: "numeric",
   month: "short",
   year: "numeric",
 });
 
-const currencyFmt = new Intl.NumberFormat("en-AU", {
+const currencyFmt = new Intl.NumberFormat("en-US", {
   style: "currency",
-  currency: "AUD",
+  currency: "USD",
   maximumFractionDigits: 0,
 });
 

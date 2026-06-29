@@ -128,14 +128,14 @@ const CATALOG: CategorySpec[] = [
 ];
 
 const RETAILERS = [
-  "JB Hi-Fi",
-  "Harvey Norman",
-  "Officeworks",
-  "The Good Guys",
-  "Amazon AU",
+  "Best Buy",
+  "Amazon",
   "Apple Store",
-  "Bing Lee",
-  "Kogan",
+  "Costco",
+  "Walmart",
+  "B&H Photo",
+  "Target",
+  "Newegg",
 ];
 
 function pick<T>(arr: T[]): T {
@@ -150,8 +150,9 @@ function warrantyProviderFor(brand: string): string {
   return faker.helpers.arrayElement([
     map[brand] ?? "Manufacturer Warranty",
     "Manufacturer Warranty",
-    "Extended Warranty (Allianz)",
-    "Retailer Warranty",
+    "Asurion Protection Plan",
+    "Allstate Protection Plan",
+    "SquareTrade",
   ]);
 }
 
