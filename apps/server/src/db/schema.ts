@@ -35,6 +35,9 @@ export const device = pgTable("device", {
   warrantyExpiry: timestamp("warranty_expiry").notNull(),
   warrantyProvider: text("warranty_provider").notNull(),
   notes: text("notes").notNull().default(""),
+  // R2 object key of the scanned warranty card / receipt image, if the device
+  // was created via the OCR scan flow. Null for manually-entered devices.
+  warrantyCardKey: text("warranty_card_key"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 

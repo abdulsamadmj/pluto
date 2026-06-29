@@ -96,8 +96,39 @@ export const createDeviceSchema = z.object({
     .max(600, "That's too long"),
   warrantyProvider: z.string().trim().min(1, "Provider is required"),
   notes: z.string().max(2000).default(""),
+  // R2 object key of the warranty card / receipt image, set when the device was
+  // created from a scan. Optional — manual entry leaves it unset.
+  warrantyCardKey: z.string().optional(),
 });
 export type CreateDevice = z.infer<typeof createDeviceSchema>;
+
+/**
+ * What the OCR scan endpoint (`POST /devices/scan`) extracts from a warranty
+ * card / receipt photo. Every field is nullable — the vision model only fills
+ * what it can confidently read, and the user completes the rest. Mirrors the
+ * create form's fields so the client can prefill directly. `purchaseDate` is an
+ * ISO `YYYY-MM-DD` string and `purchasePrice` / `warrantyMonths` are whole
+ * numbers, normalized by the model.
+ */
+export const scanExtractionSchema = z.object({
+  name: z.string().nullable().optional(),
+  brand: z.string().nullable().optional(),
+  category: z.string().nullable().optional(),
+  model: z.string().nullable().optional(),
+  serialNumber: z.string().nullable().optional(),
+  purchaseDate: z.string().nullable().optional(),
+  purchasePrice: z.number().int().nullable().optional(),
+  retailer: z.string().nullable().optional(),
+  warrantyMonths: z.number().int().nullable().optional(),
+  warrantyProvider: z.string().nullable().optional(),
+});
+export type ScanExtraction = z.infer<typeof scanExtractionSchema>;
+
+/** Response body for `POST /devices/scan`. */
+export type ScanResult = {
+  key: string;
+  extracted: ScanExtraction;
+};
 
 /** Body for `PATCH /devices/:id` — all fields optional (partial update). */
 export const updateDeviceSchema = createDeviceSchema.partial();
