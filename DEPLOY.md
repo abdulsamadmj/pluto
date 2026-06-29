@@ -59,15 +59,35 @@ tokens and is unaffected by cookie settings.
 
 ## 3. Web app (Vercel)
 
-1. **New Project → Import** this repo. Leave the **Root Directory** as the repo
-   root (so the pnpm workspace installs).
-2. Vercel reads [`vercel.json`](./vercel.json):
+1. **New Project → Import** this repo.
+2. Under **Settings → General → Root Directory**, leave it **empty** (repo root).
+   Do **not** set it to `apps/web` — the monorepo install and Turbo build must
+   run from the repository root.
+3. Under **Settings → Build & Deployment**, either disable the dashboard
+   overrides and let [`vercel.json`](./vercel.json) drive the build, or set
+   these values explicitly:
+
+   | Setting | Value |
+   | --- | --- |
+   | Framework Preset | Other (or Vite with overrides below) |
+   | Install Command | `pnpm install --frozen-lockfile` |
+   | Build Command | `pnpm turbo run build --filter=@repo/web` |
+   | Output Directory | `apps/web/dist` |
+   | Root Directory | *(empty — repo root)* |
+
+   > **Common mistake:** Root Directory = `apps/web` + Output Directory =
+   > `apps/web/dist` makes Vercel look for `apps/web/apps/web/dist`, which does
+   > not exist. If you insist on Root Directory = `apps/web`, Output must be
+   > just `dist`, and Install/Build must `cd ../..` first — using the repo
+   > root is simpler.
+
+   [`vercel.json`](./vercel.json) already encodes the recommended settings:
    - build: `pnpm turbo run build --filter=@repo/web` (Turbo builds the workspace
      deps `@repo/validators` and `@repo/server` first — web consumes their
      generated `dist` type declarations, which are gitignored)
    - output: `apps/web/dist`
    - SPA fallback rewrite to `/index.html`
-3. Add an **Environment Variable** (Production):
+4. Add an **Environment Variable** (Production):
 
    | Variable | Value |
    | --- | --- |
@@ -75,7 +95,7 @@ tokens and is unaffected by cookie settings.
 
    > Vite inlines this at **build time**, so a redeploy is required if you change it.
 
-4. Add the custom domain `app.pluto.com` under **Settings → Domains**.
+5. Add the custom domain `app.pluto.com` under **Settings → Domains**.
 
 ## 4. Mobile (Expo)
 
