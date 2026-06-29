@@ -69,6 +69,7 @@ const app = new Hono<HonoAppContext>()
 
     return auth.handler(raw);
   })
+  .get("/", (c) => c.json({ message: "Hello World" }, 200))
   .get("/health", (c) => c.json({ status: "ok" }, 200))
   .route("/devices", devices)
   .route("/stats", stats)
