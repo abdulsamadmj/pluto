@@ -5,6 +5,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
 import { AppShell } from "../components/app-shell";
 import { DeviceForm, toDateInput } from "../components/device-form";
+import { resolveTheme } from "../lib/card-themes";
 import { requireAuth } from "../lib/guard";
 import {
   deviceByIdQueryOptions,
@@ -70,6 +71,7 @@ function EditDevicePage() {
               warrantyMonths: data.warrantyMonths,
               warrantyProvider: data.warrantyProvider,
               notes: data.notes ?? "",
+              cardTheme: resolveTheme(data.cardTheme),
             }}
             submitLabel="Save changes"
             showScan={false}

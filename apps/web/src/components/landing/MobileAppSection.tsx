@@ -3,7 +3,7 @@ import { Bell, FileText, ScanLine, WifiOff } from "lucide-react";
 import { StoreBadges } from "./StoreBadges";
 
 const HIGHLIGHTS = [
-  { icon: ScanLine, label: "Scan serials & barcodes" },
+  { icon: ScanLine, label: "Snap a receipt to autofill" },
   { icon: Bell, label: "Push expiry reminders" },
   { icon: FileText, label: "Capture receipts" },
   { icon: WifiOff, label: "Offline access" },
@@ -45,8 +45,8 @@ export function MobileAppSection() {
           Your warranties, in your pocket.
         </motion.h2>
         <motion.p variants={item} className="mx-auto mt-5 max-w-md text-lg text-zinc-400">
-          Track devices, scan receipts, and get push alerts before coverage ends —
-          all from the Pluto app, built on the same secure backend.
+          Snap a receipt and Pluto fills in the details, then sends push alerts
+          before coverage ends — all from the app, on the same secure backend.
         </motion.p>
 
         <motion.div variants={item} className="mt-8">

@@ -19,13 +19,17 @@ import {
 import { Textarea } from "@repo/ui/textarea";
 import { toast } from "@repo/ui/toast";
 import {
+  type CardTheme,
+  cardThemeLabels,
+  cardThemes,
   createDeviceSchema,
   deviceCategories,
   type ScanExtraction,
 } from "@repo/validators";
 import { AnimatePresence, motion } from "framer-motion";
-import { Check, FileUp, Loader2, Paperclip, ScanLine } from "lucide-react";
+import { Check, FileUp, Loader2, Paperclip, ScanLine, Shuffle } from "lucide-react";
 import { useRef, useState } from "react";
+import { swatchClass } from "../lib/card-themes";
 import { scanWarrantyCard, uploadDocument } from "../queries/devices.queries";
 
 /** The form's input shape (strings from inputs; zod coerces on submit). */
@@ -41,6 +45,7 @@ export type DeviceFormValues = {
   warrantyMonths: number | string;
   warrantyProvider: string;
   notes: string;
+  cardTheme: CardTheme;
   // R2 object key of a scanned card image, set when added via the scan flow.
   warrantyCardKey?: string;
 };
@@ -62,6 +67,7 @@ export const emptyDeviceForm = (): DeviceFormValues => ({
   warrantyMonths: 12,
   warrantyProvider: "Manufacturer Warranty",
   notes: "",
+  cardTheme: "brand",
   warrantyCardKey: undefined,
 });
 
@@ -184,7 +190,16 @@ export function DeviceForm({
   return (
     <Form {...form}>
       <form
-        onSubmit={form.handleSubmit((values) => onSubmit(values))}
+        onSubmit={form.handleSubmit((values) => {
+          // A stray Enter / keyboard "Go" in any field submits the whole form.
+          // Only create the device on the final step; otherwise advance, so the
+          // user can't skip the remaining steps (e.g. Documents) by accident.
+          if (step < steps.length - 1) {
+            setStep((s) => Math.min(s + 1, steps.length - 1));
+            return;
+          }
+          onSubmit(values);
+        })}
         className="flex flex-col gap-5"
       >
         <Stepper steps={steps} step={step} />
@@ -281,6 +296,40 @@ export function DeviceForm({
                   />
                   <Field form={form} name="model" label="Model" placeholder="A2780" />
                   <Field form={form} name="serialNumber" label="Serial number" placeholder="C02XXXXXXXXX" />
+                  <FormField
+                    control={form.control}
+                    name="cardTheme"
+                    render={({ field }) => (
+                      <FormItem className="sm:col-span-2">
+                        <FormLabel>Card colour</FormLabel>
+                        <div className="flex flex-wrap gap-2.5">
+                          {cardThemes.map((t) => {
+                            const selected = field.value === t;
+                            return (
+                              <button
+                                key={t}
+                                type="button"
+                                onClick={() => field.onChange(t)}
+                                aria-label={cardThemeLabels[t]}
+                                aria-pressed={selected}
+                                title={cardThemeLabels[t]}
+                                className={`grid h-10 w-16 place-items-center rounded-lg ring-2 ring-offset-2 ring-offset-[#202020] transition ${swatchClass(t)} ${
+                                  selected
+                                    ? "ring-white"
+                                    : "ring-transparent hover:ring-white/40"
+                                }`}
+                              >
+                                {t === "auto" && (
+                                  <Shuffle className="size-4 text-white drop-shadow" />
+                                )}
+                              </button>
+                            );
+                          })}
+                        </div>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 </div>
               )}
 

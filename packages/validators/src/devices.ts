@@ -75,6 +75,65 @@ export const deviceCategories = [
 export type DeviceCategory = (typeof deviceCategories)[number];
 
 /**
+ * Gradient skins a device's warranty card can use. `auto` (the default) picks a
+ * stable, per-device accent colour that fades into near-black — so an
+ * unassigned card gets its own hue instead of everything looking identical. The
+ * rest are explicit manual picks. Shared so the DB column, API validation, and
+ * both clients agree.
+ */
+export const cardThemes = [
+  "auto",
+  "brand",
+  "ocean",
+  "violet",
+  "sunset",
+  "slate",
+] as const;
+export type CardTheme = (typeof cardThemes)[number];
+
+export const cardThemeLabels: Record<CardTheme, string> = {
+  auto: "Auto",
+  brand: "Pluto",
+  ocean: "Ocean",
+  violet: "Violet",
+  sunset: "Sunset",
+  slate: "Slate",
+};
+
+/**
+ * Accent → mid pairs for the `auto` theme; each is rendered as
+ * `accent → mid → autoCardEnd` (near-black) at the same proportions as the
+ * fixed themes. Shared by both clients so a given device gets the same hue
+ * everywhere.
+ */
+export const autoCardPalette = [
+  ["#00DE6F", "#0A3F2C"], // green
+  ["#22D3EE", "#0E2A40"], // cyan
+  ["#3B82F6", "#101F3A"], // blue
+  ["#A78BFA", "#241A40"], // violet
+  ["#F472B6", "#3A1630"], // pink
+  ["#FB923C", "#3A1C16"], // orange
+  ["#FBBF24", "#3A2E10"], // amber
+  ["#F87171", "#3A1414"], // red
+  ["#2DD4BF", "#0C3330"], // teal
+  ["#818CF8", "#1A1B40"], // indigo
+] as const;
+export const autoCardEnd = "#0A0B0C";
+
+/** Stable index into the auto palette derived from a seed (e.g. a device id). */
+export function cardSeedIndex(seed: string): number {
+  let h = 0;
+  for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) | 0;
+  return Math.abs(h) % autoCardPalette.length;
+}
+
+/** The three gradient stops for a device's `auto` theme. */
+export function autoCardStops(seed: string): [string, string, string] {
+  const [accent, mid] = autoCardPalette[cardSeedIndex(seed)];
+  return [accent, mid, autoCardEnd];
+}
+
+/**
  * Body for `POST /devices`. `warrantyExpiry` and the warranty status are NOT
  * accepted from the client — the server derives expiry from
  * `purchaseDate + warrantyMonths`, keeping a single source of truth.
@@ -96,6 +155,9 @@ export const createDeviceSchema = z.object({
     .max(600, "That's too long"),
   warrantyProvider: z.string().trim().min(1, "Provider is required"),
   notes: z.string().max(2000).default(""),
+  // Gradient skin for the device's warranty card. Defaults to the auto theme
+  // (a stable per-device accent), letting cards differ without a manual pick.
+  cardTheme: z.enum(cardThemes).default("auto"),
   // R2 object key of the warranty card / receipt image, set when the device was
   // created from a scan. Optional — manual entry leaves it unset.
   warrantyCardKey: z.string().optional(),

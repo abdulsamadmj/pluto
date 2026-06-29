@@ -49,13 +49,25 @@ function DesktopLanding() {
               left → text right, phone right → text left). */}
           <Chapter
             index="01"
+            eyebrow="Capture"
+            align="left"
+            title={
+              <>
+                Snap it.{" "}
+                <em className="text-primary not-italic">We&apos;ll do the typing.</em>
+              </>
+            }
+            body="Photograph a receipt or warranty card and Pluto reads the brand, model, serial, purchase date, and coverage — then fills the form for you. Review, save, done."
+          />
+          <Chapter
+            index="02"
             eyebrow="Catalog"
             align="right"
             title={<>Every device, in one place.</>}
             body="Laptops, phones, TVs, appliances — capture purchase details, serials, and receipts in a single organized catalog."
           />
           <Chapter
-            index="02"
+            index="03"
             eyebrow="Stay ahead"
             align="left"
             title={
@@ -66,7 +78,7 @@ function DesktopLanding() {
             body="See what's active, expiring within 30 days, or already lapsed — and act before coverage runs out."
           />
           <Chapter
-            index="03"
+            index="04"
             eyebrow="Dashboard"
             align="right"
             title={<>Everything at a glance.</>}
@@ -148,8 +160,8 @@ function Hero() {
         className="mx-auto max-w-xl"
       >
         <p className="text-sm text-zinc-400">
-          Catalog every device you own, track warranty coverage, and get ahead of
-          upcoming expirations.
+          Snap a receipt to add a device in seconds, track every warranty, and get
+          ahead of upcoming expirations — no manual typing.
         </p>
         <div className="mt-4 flex flex-col items-center justify-center gap-3 sm:flex-row">
           <Button asChild size="lg">

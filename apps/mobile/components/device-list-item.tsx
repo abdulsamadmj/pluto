@@ -12,7 +12,11 @@ export type DeviceItem = {
   brand: string;
   model: string;
   category: string;
+  serialNumber: string;
+  purchasePrice: number;
+  warrantyProvider: string;
   warrantyExpiry: string;
+  cardTheme: string;
   status: WarrantyStatus;
 };
 

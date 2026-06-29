@@ -1,4 +1,7 @@
 import {
+  type CardTheme,
+  cardThemeLabels,
+  cardThemes,
   createDeviceSchema,
   deviceCategories,
   type ScanExtraction,
@@ -11,10 +14,12 @@ import {
   Image as ImageIcon,
   Paperclip,
   ScanLine,
+  Shuffle,
 } from "lucide-react-native";
 import { useState } from "react";
 import { Alert, Image, Pressable, ScrollView, Text, View } from "react-native";
 import Animated, { FadeIn } from "react-native-reanimated";
+import { swatchColor } from "../lib/card-themes";
 import { scanWarrantyCard, uploadDocument } from "../lib/scan";
 import { Button, Field, Input } from "./ui";
 
@@ -34,6 +39,7 @@ export type DeviceFormValues = {
   warrantyMonths: string;
   warrantyProvider: string;
   notes: string;
+  cardTheme: CardTheme;
   // R2 object key of a scanned card image, set when added via the scan flow.
   warrantyCardKey?: string;
 };
@@ -55,6 +61,7 @@ export function emptyDeviceForm(): DeviceFormValues {
     warrantyMonths: "12",
     warrantyProvider: "Manufacturer Warranty",
     notes: "",
+    cardTheme: "brand",
     warrantyCardKey: undefined,
   };
 }
@@ -328,6 +335,24 @@ export function DeviceForm({
             </Field>
             <Field label="Serial number" error={errors.serialNumber}>
               <Input value={values.serialNumber} onChangeText={(v) => set("serialNumber", v)} autoCapitalize="characters" />
+            </Field>
+            <Field label="Card colour">
+              <View className="flex-row flex-wrap gap-2.5">
+                {cardThemes.map((t) => {
+                  const selected = values.cardTheme === t;
+                  return (
+                    <Pressable
+                      key={t}
+                      accessibilityLabel={cardThemeLabels[t]}
+                      onPress={() => setValues((p) => ({ ...p, cardTheme: t }))}
+                      style={{ backgroundColor: swatchColor(t) }}
+                      className={`h-10 w-16 items-center justify-center rounded-lg border-2 ${selected ? "border-white" : "border-transparent"}`}
+                    >
+                      {t === "auto" && <Shuffle size={16} color="#e4e4e7" />}
+                    </Pressable>
+                  );
+                })}
+              </View>
             </Field>
           </>
         )}
