@@ -3,6 +3,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { ActivityIndicator, ScrollView, View } from "react-native";
 import { DeviceForm, toDateInput } from "../../../components/device-form";
 import { Muted } from "../../../components/ui";
+import { resolveTheme } from "../../../lib/card-themes";
 import {
   deviceByIdQueryOptions,
   updateDeviceMutationOptions,
@@ -56,6 +57,7 @@ export default function EditDeviceScreen() {
           warrantyMonths: String(data.warrantyMonths),
           warrantyProvider: data.warrantyProvider,
           notes: data.notes ?? "",
+          cardTheme: resolveTheme(data.cardTheme),
         }}
         submitLabel="Save changes"
         showScan={false}
