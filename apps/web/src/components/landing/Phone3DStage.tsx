@@ -65,7 +65,7 @@ function PhoneFallback2D() {
     <div className="relative h-[60vh] max-h-[640px] w-auto" style={{ aspectRatio: "9 / 19" }}>
       <div className="h-full overflow-hidden rounded-[2rem] border-4 border-zinc-800 bg-[#202020] shadow-2xl">
         <img
-          src="/app-screen.png"
+          src="/screens/03-dash.png"
           alt="Pluto app screenshot"
           className="h-full w-full object-cover object-top"
         />
