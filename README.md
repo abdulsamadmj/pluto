@@ -445,6 +445,9 @@ Planned follow-ups not yet implemented:
 - [ ] **Proper logout flow (mobile)** — move sign-out into the profile screen with
   a clear confirmation, full session/token teardown, query-cache reset, and a
   reliable redirect back to the auth stack.
+- [ ] **Push notifications (mobile)** — surface warranty-expiry alerts as native
+  push notifications via Expo Notifications, with device-token registration on the
+  server and a scheduled job that pushes reminders ahead of expiry.
 
 ---
 
