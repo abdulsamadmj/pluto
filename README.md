@@ -28,17 +28,67 @@ PostgreSQL schema through the API to the rendered table cell.
 
 ---
 
+## ✅ Assignment Coverage
+
+Every requirement from the brief, mapped to where it lives in the code.
+
+### Front-end
+
+| Requirement | Status | Where |
+| ----------- | ------ | ----- |
+| Landing — hero section | ✅ | `apps/web/src/routes/index.tsx` (`Hero`) |
+| Landing — product features | ✅ | `Chapter` panels + `MobileAppSection` |
+| Landing — statistics section | ✅ | `Stats` (animated count-up) |
+| Landing — call-to-action | ✅ | `CallToAction` + nav "Get started" |
+| Landing — responsive | ✅ | Dedicated `MobileLanding` for small viewports |
+| Auth — sign in | ✅ | `routes/sign-in.tsx` |
+| Auth — sign up | ✅ | `routes/sign-up.tsx` |
+| Auth — forgot password | ✅ | `routes/forgot-password.tsx` |
+| Auth — reset password | ✅ | `routes/reset-password.tsx` |
+| Auth — validation & error handling | ✅ | Zod schemas (`lib/auth-schemas.ts`) + inline form errors |
+| Dashboard — summary metrics (Total / Active / Expiring Soon / Expired) | ✅ | `dashboard.tsx` (`MetricCards`) ← `GET /stats` |
+| Dashboard — device table (Name, Brand, Purchase Date, Warranty Expiry, Status, Actions) | ✅ | `dashboard.tsx` (`DeviceTable`) |
+| Dashboard — search / filter / sort / pagination | ✅ | URL-driven, executed server-side in `devices.service.ts` |
+| Dashboard — loading & empty states | ✅ | `LoadingRows` (skeletons), `EmptyState`, + error state |
+| Device details — info, brand, purchase, warranty, expiry | ✅ | `routes/devices.$id.index.tsx` |
+| Device details — warranty timeline / history | ✅ | `warranty_event` table → details timeline |
+| Device details — notes section | ✅ | Editable notes (`PATCH /devices/:id/notes`) |
+
+### Back-end / API
+
+| Requirement | Status | Where |
+| ----------- | ------ | ----- |
+| API layer (Node; any framework) | ✅ | Hono on Node — `apps/server` |
+| Device listing endpoint | ✅ | `GET /devices` |
+| Device details endpoint | ✅ | `GET /devices/:id` |
+| Pagination / search / filter / sort | ✅ | `devices.service.ts` (Drizzle, all in SQL) |
+| Dummy data source | ✅ | `db/seed.ts` (~250 Faker devices) |
+
+### Beyond the brief
+
+- **Companion Expo mobile app** sharing the same API, validators, and auth.
+- **Real (not mocked) authentication** with sessions and a route guard.
+- **Full device CRUD** (create / edit / delete) on web **and** mobile.
+- **Warranty-expiry notifications** with an unread badge.
+- **Table ⇄ grid view toggle** with shareable URL state.
+- **Scroll-driven 3D landing hero** (React Three Fiber) with graceful fallbacks.
+
+---
+
 ## 🧱 Tech Stack
 
-| Layer        | Technology |
-| ------------ | ---------- |
-| Front-end    | React + Vite, TanStack Router (file-based), TanStack Query, Tailwind CSS, Shadcn UI |
-| Type-safe API client | Hono RPC + [`@reno-stack/hono-react-query`](https://github.com/reno-stack/hono-react-query) |
-| Back-end     | Hono (Node), Drizzle ORM, PostgreSQL |
-| Auth         | Better-Auth (email & password) |
-| Validation   | Zod schemas shared across client & server (`packages/validators`) |
-| Seed data    | `@faker-js/faker` (~250 devices) |
-| Tooling      | pnpm workspaces, Turborepo, TypeScript, ESLint |
+| Layer        | Technology | Why |
+| ------------ | ---------- | --- |
+| Front-end    | React 19 + Vite, TanStack Router (file-based, typed search params), TanStack Query | Typed routing + URL-as-state; Query handles caching, loading/error states, and mutations |
+| UI / styling | Tailwind CSS, Shadcn UI (Radix primitives), Lucide icons | Accessible component primitives + a consistent dark design system |
+| Landing visuals | React Three Fiber (`three`), Framer Motion | Scroll-choreographed 3D phone + section reveals, with reduced-motion/WebGL fallbacks |
+| Type-safe API client | Hono RPC + [`@reno-stack/hono-react-query`](https://github.com/reno-stack/hono-react-query) | Server route types flow into the client; no hand-written `fetch` or response types |
+| Back-end     | Hono (on Node via `@hono/node-server`), Drizzle ORM, PostgreSQL | Web-standard, ultralight router that exposes an RPC type; SQL-first typed ORM |
+| Auth         | Better-Auth (email & password) | Real sessions (cookies on web, bearer tokens on native) with a route guard |
+| Validation   | Zod schemas shared across client & server (`packages/validators`) | One contract validates requests **and** types inputs |
+| Mobile       | Expo (React Native) + Expo Router, NativeWind | Companion app reusing the same API, validators, and auth |
+| Seed data    | `@faker-js/faker` (~250 devices, deterministic seed) | Realistic, repeatable demo dataset |
+| Tooling      | pnpm workspaces, Turborepo, TypeScript, ESLint, Prettier | Caching task runner across a shared-code monorepo |
 
 ---
 
@@ -233,17 +283,33 @@ pnpm --filter @repo/mobile dev      # then press i / a / w, or scan the QR
 > The monorepo uses **`node-linker=hoisted`** (in `.npmrc`) — required for Expo's
 > Metro bundler to resolve dependencies in a pnpm workspace.
 
-### Useful commands
+### Monorepo scripts
 
-| Command | Description |
-| ------- | ----------- |
-| `pnpm dev`      | Run API + web together (Turborepo) |
-| `pnpm build`    | Production build of all packages |
-| `pnpm db:push`  | Apply the Drizzle schema (`drizzle-kit push`) |
-| `pnpm db:seed`  | Seed demo data |
-| `pnpm db:studio`| Browse the database (`drizzle-kit studio`) |
-| `pnpm create:route <name>` | Scaffold a new Hono route |
-| `pnpm ui-add <name>`       | Add a Shadcn component |
+Run from the repo root. Most root scripts are thin wrappers over a single
+workspace (via `pnpm --filter`) or fan out across all of them (via Turborepo),
+so you can drive any individual app without `cd`-ing into it.
+
+| Command | Runs | Description |
+| ------- | ---- | ----------- |
+| `pnpm dev`         | all      | API + web together (Turborepo, parallel) |
+| `pnpm dev:web`     | web      | Just the Vite web app (`:5173`) |
+| `pnpm dev:server`  | server   | Just the Hono API + tsc watch (`:8080`) |
+| `pnpm dev:mobile`  | mobile   | Expo dev server (press `i` / `a` / `w`) |
+| `pnpm build`       | all      | Production build of every package |
+| `pnpm build:web`   | web      | Build only the web app |
+| `pnpm build:server`| server   | Build only the API |
+| `pnpm start`       | server   | Run the built API (`node dist`) |
+| `pnpm preview`     | web      | Preview the production web build |
+| `pnpm mobile:ios`  | mobile   | Build & launch the iOS dev client |
+| `pnpm mobile:android` | mobile | Build & launch the Android dev client |
+| `pnpm lint`        | all      | ESLint across packages |
+| `pnpm typecheck`   | mobile   | `tsc --noEmit` for the mobile app |
+| `pnpm format`      | repo     | Prettier write (`**/*.{ts,tsx,md}`) |
+| `pnpm db:push`     | server   | Apply the Drizzle schema (`drizzle-kit push`) |
+| `pnpm db:seed`     | server   | Seed ~250 demo devices + timelines |
+| `pnpm db:studio`   | server   | Browse the database (`drizzle-kit studio`) |
+| `pnpm create:route <name>` | server | Scaffold a new Hono route |
+| `pnpm ui-add <name>`       | ui     | Add a Shadcn component |
 
 ---
 
@@ -264,23 +330,109 @@ The front-end and back-end deploy independently:
 
 ## 🧭 Implementation Notes & Decisions
 
-- **Authentication is real, not mocked.** The brief allowed mocking, but Reno
-  ships Better-Auth, so email/password auth is wired end-to-end with a
-  `requireAuth` route guard (`apps/web/src/lib/guard.ts`). The forgot/reset flow
-  is functional; since there's no mail server, the reset link is logged to the
-  server console.
-- **Devices are global demo data** (not user-scoped) so the seeded dataset is
-  immediately visible to any account you create.
-- **All data handling is server-side.** Search (`ilike`), status filtering
-  (translated to date-range predicates), sorting, and pagination all run in
-  PostgreSQL via Drizzle — see `apps/server/src/services/devices.service.ts`.
-- **Table state lives in the URL.** Search/filter/sort/page are TanStack Router
-  search params, so views are shareable and survive refresh, and they key the
-  React Query cache.
-- **Status logic is defined once** in `packages/validators` and reused by the
-  dashboard metrics, the table badges, and the details view.
-- **`PORT` is configurable** (default `8080`) via the env, to avoid clashing with
-  other local services on `8000`.
+This section captures the **why** behind the notable choices — the trade-offs,
+the deviations from the brief, and the conventions that keep the codebase
+cohesive.
+
+### Architecture
+
+- **Why a monorepo (pnpm workspaces + Turborepo).** The web app, the API, and
+  the mobile app all need to agree on the same types and validation rules.
+  Putting them in one repo with shared `packages/validators` (Zod) and
+  `@repo/server` (which exports the API's `AppType`) means a change to a route
+  or a column is type-checked across **every** consumer at once. Turborepo
+  caches and parallelizes `build`/`lint`/`dev` across the graph.
+- **Why end-to-end type safety is the headline.** The single most valuable
+  property here is that a type defined once in the Drizzle schema flows
+  unbroken to the rendered table cell (see the diagram above). There are **no
+  hand-written DTOs, fetch wrappers, or response interfaces** — they're all
+  inferred. Renaming a column is a compile-time refactor, not a runtime bug.
+
+### Back-end / API
+
+- **Why Hono instead of Express.** The brief *preferred* Express but allowed any
+  framework. Express was rejected for one decisive reason: it has **no typed
+  client**. Hono exposes its app type (`AppType = typeof app`), which the
+  frontend consumes via `hc<AppType>()` (Hono RPC) — that's what makes request
+  shapes and JSON responses fully inferred on the client. Hono is also
+  web-standard (`Request`/`Response`), tiny, runs on Node via
+  `@hono/node-server`, and is portable to edge runtimes later.
+- **All data handling runs in the database, not the client.** Search (`ilike`
+  across name/brand/model/serial), status filtering, sorting, and pagination are
+  composed into a single SQL query with Drizzle in
+  `apps/server/src/services/devices.service.ts`. This is the correct shape for an
+  API requirement and scales past the ~250-row demo to arbitrarily large
+  datasets — the client only ever receives one page.
+- **Why Drizzle + PostgreSQL.** Drizzle gives a TypeScript-first schema whose
+  row types are *inferred* (no codegen step), plus `drizzle-kit push`/`studio`
+  for a fast local loop. Postgres provides the `ilike` and date-range predicates
+  the filters rely on.
+- **`PORT` is configurable** (default `8080`) to avoid clashing with other local
+  services; `/health` is exposed for deployment health checks.
+
+### Domain & data
+
+- **Warranty status is derived, never stored.** A single helper in
+  `packages/validators` computes `expired` / `expiring_soon` (≤ 30 days) /
+  `active` from the expiry date. Storing status would go stale the moment a date
+  passes; deriving it keeps the dashboard metrics, the table badges, the filter,
+  and the details view perfectly consistent. The **status filter** is translated
+  back into date-range predicates so it can run in SQL.
+- **Devices are global demo data (not user-scoped).** This is a deliberate
+  *demo* convenience so the seeded dataset is visible to any account you create —
+  no need to seed-then-claim. In a real product these would be scoped to the
+  owner; the schema and services are structured so adding a `userId` filter is a
+  small change.
+- **Prices are stored as whole integer currency units (USD)** to keep the demo
+  simple (no cents/precision concerns), and formatted at the edge with
+  `Intl.NumberFormat` (`en-US`). The seed (retailers, providers, currency) is
+  US/international-flavored.
+- **The seed is deterministic** (`faker.seed(42)`) so re-seeds and recorded
+  demos look identical every run.
+
+### Front-end
+
+- **The URL is the source of truth for table state.** Search, filter, sort, and
+  page are TanStack Router search params validated by the **same**
+  `deviceQuerySchema` the API uses. Views are therefore shareable and survive a
+  refresh, and the params directly key the React Query cache (no duplicate
+  client state to keep in sync).
+- **React Query owns server state.** It provides the loading skeletons, error
+  states, and cache invalidation after mutations (create/edit/delete/notes)
+  for free, on both web and mobile.
+- **A bespoke 3D landing hero** (React Three Fiber) choreographs a single phone
+  model to scroll progress. It renders **on demand** (only while something
+  animates) and degrades gracefully: users with `prefers-reduced-motion` or no
+  WebGL get a static 2D phone, and small viewports get a separate, non-scrolling
+  promo page (`MobileLanding`) instead of the full scroll story.
+
+### Auth
+
+- **Authentication is real, not mocked.** The brief allowed mocking, but
+  email/password auth is wired end-to-end with Better-Auth and a `requireAuth`
+  route guard (`apps/web/src/lib/guard.ts`). Web uses cookie sessions; the
+  mobile app uses bearer-token sessions via the Better-Auth Expo plugin.
+- **Forgot/reset is functional.** Since there's no mail server wired up, the
+  reset link/token is logged to the server console instead of emailed, and
+  email verification is disabled so demo accounts are usable immediately.
+
+### Mobile
+
+- **The Expo app is a true client of the same backend** — it imports the shared
+  validators and `@repo/server` types and talks to the identical Hono API, which
+  is the clearest possible proof that the type-safe contract is reusable across
+  platforms.
+- **`node-linker=hoisted`** is set in `.npmrc` because Expo's Metro bundler
+  can't resolve the default pnpm symlinked store in a workspace.
+
+### Trade-offs & known limitations
+
+- **No automated test suite.** TypeScript (strict) + ESLint are the safety net
+  for the assignment's scope; the type system already catches the class of bugs
+  unit tests would here. Service functions are written to be easily testable if
+  added.
+- **Reset email is console-logged**, not delivered (no SMTP configured).
+- **Global devices** are a demo simplification (see above).
 
 ---
 
