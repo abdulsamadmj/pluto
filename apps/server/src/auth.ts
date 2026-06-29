@@ -28,6 +28,26 @@ export const auth: ReturnType<typeof betterAuth> = betterAuth({
   // Enables native (Expo) clients: bearer-token sessions + deep-link callbacks.
   plugins: [expo()],
   trustedOrigins: [env.WEB_URL, MOBILE_SCHEME],
+  // In production the web app and API live on different subdomains
+  // (e.g. app.pluto.com ↔ api.pluto.com). `baseURL` pins the canonical API
+  // origin, and `crossSubDomainCookies` scopes the session cookie to the parent
+  // domain so the browser sends it on cross-subdomain requests. Both are no-ops
+  // locally (env vars unset), preserving the dev experience.
+  ...(env.BETTER_AUTH_URL ? { baseURL: env.BETTER_AUTH_URL } : {}),
+  ...(env.COOKIE_DOMAIN
+    ? {
+        advanced: {
+          crossSubDomainCookies: {
+            enabled: true,
+            domain: env.COOKIE_DOMAIN,
+          },
+          defaultCookieAttributes: {
+            sameSite: "lax",
+            secure: true,
+          },
+        },
+      }
+    : {}),
 });
 
 type AuthStatus =

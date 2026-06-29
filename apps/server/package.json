@@ -22,8 +22,11 @@
         "build:node": "tsc",
         "db:studio": "pnpm with-env drizzle-kit studio",
         "db:push": "pnpm with-env drizzle-kit push",
+        "db:push:prod": "drizzle-kit push",
         "db:seed": "pnpm with-env tsx src/db/seed.ts",
+        "db:seed:prod": "tsx src/db/seed.ts",
         "start": "pnpm with-env node dist/src/index.js",
+        "start:prod": "tsx src/index.ts",
         "with-env": "dotenv -e ../../.env --",
         "create:route": "node ./new-route.js"
     },
@@ -34,9 +37,11 @@
         "@repo/validators": "workspace:*",
         "@t3-oss/env-core": "^0.13.0",
         "better-auth": "^1.2.7",
+        "drizzle-kit": "^0.31.0",
         "drizzle-orm": "^0.43.1",
         "hono": "^4.7.8",
         "pg": "^8.15.6",
+        "tsx": "^4.19.4",
         "zod": "^4.0.5"
     },
     "devDependencies": {
@@ -44,8 +49,6 @@
         "@types/node": "^20.11.17",
         "@types/pg": "^8.11.14",
         "dotenv-cli": "^8.0.0",
-        "drizzle-kit": "^0.31.0",
-        "tsx": "^4.19.4",
         "typescript": "^5.8.3"
     }
 }
