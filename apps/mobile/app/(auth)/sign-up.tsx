@@ -27,7 +27,7 @@ export default function SignUp() {
       setError(error.message ?? "Could not create account");
       return;
     }
-    router.replace("/(tabs)");
+    router.replace("/(tabs)/dashboard");
   };
 
   return (

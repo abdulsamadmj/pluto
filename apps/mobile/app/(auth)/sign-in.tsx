@@ -26,7 +26,7 @@ export default function SignIn() {
       setError(error.message ?? "Invalid email or password");
       return;
     }
-    router.replace("/(tabs)");
+    router.replace("/(tabs)/dashboard");
   };
 
   return (
