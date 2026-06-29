@@ -10,9 +10,15 @@ useGLTF.preload(MODEL_URL);
 
 const CASE_COLOR = "#00DE6F"; // Pluto magenta
 const TARGET_HEIGHT = 4.3; // world units the phone should occupy
+const SCREEN_SCALE = 1.02; // screen overlay scale so images sit flush in the bezel
 
 // Even bezel around the screen, as a fraction of device width (world units).
 const BEZEL_FRAC = 0.05;
+
+function applyScreenTextureSettings(t: THREE.Texture) {
+  t.colorSpace = THREE.SRGBColorSpace;
+  t.anisotropy = 8;
+}
 
 /** Rounded-rectangle plane with UVs remapped to [0,1] for texturing. */
 function roundedPlane(w: number, h: number, r: number): THREE.ShapeGeometry {
@@ -56,7 +62,6 @@ function PhoneModel({
   const outer = useRef<THREE.Group>(null);
   const screenRef = useRef<THREE.Mesh>(null);
   const screenMat = useRef<THREE.MeshBasicMaterial>(null);
-  const islandMat = useRef<THREE.MeshBasicMaterial>(null);
   const { scene } = useGLTF(MODEL_URL);
   const textures = useTexture(SCREEN_URLS);
 
@@ -100,20 +105,11 @@ function PhoneModel({
     const z = (size.z * scale) / 2 + 0.015;
     const screenGeo = roundedPlane(w, h, Math.min(w, h) * 0.13);
 
-    // Dynamic Island: a black pill near the top of the screen.
-    const islandW = w * 0.3;
-    const islandH = w * 0.075;
-    const islandGeo = roundedPlane(islandW, islandH, islandH / 2);
-    const islandY = h / 2 - islandH / 2 - h * 0.03;
-
-    const screen = { w, h, z, screenGeo, islandGeo, islandY };
+    const screen = { z, screenGeo };
     return { node: wrap, screen };
   }, [scene]);
 
-  textures.forEach((t) => {
-    t.colorSpace = THREE.SRGBColorSpace;
-    t.anisotropy = 8;
-  });
+  textures.forEach(applyScreenTextureSettings);
 
   useLayoutEffect(() => {
     if (screenMat.current) screenMat.current.map = textures[0];
@@ -142,15 +138,13 @@ function PhoneModel({
     <group ref={outer}>
       <primitive object={node} />
       {/* Rounded screen overlay — child of the group so it rotates to landscape too */}
-      <mesh ref={screenRef} geometry={screen.screenGeo} position={[0, 0, screen.z]}>
-        <meshBasicMaterial ref={screenMat} toneMapped={false} />
-      </mesh>
-      {/* Dynamic Island */}
       <mesh
-        geometry={screen.islandGeo}
-        position={[0, screen.islandY, screen.z + 0.004]}
+        ref={screenRef}
+        geometry={screen.screenGeo}
+        position={[0, 0, screen.z]}
+        scale={[SCREEN_SCALE, SCREEN_SCALE, 1]}
       >
-        <meshBasicMaterial ref={islandMat} color="#000000" toneMapped={false} />
+        <meshBasicMaterial ref={screenMat} toneMapped={false} />
       </mesh>
     </group>
   );
@@ -172,7 +166,6 @@ function InvalidateOnChange({ values }: { values: MotionValue<number>[] }) {
   }, [values, invalidate]);
   return null;
 }
-
 
 export default function Phone3D({
   choreo,
@@ -206,7 +199,7 @@ export default function Phone3D({
 
   return (
     <div
-      className="h-full w-full"
+      className="relative h-full w-full"
       style={{ opacity: ready ? 1 : 0, transition: "opacity 700ms ease-out" }}
     >
       <Canvas
