@@ -205,7 +205,7 @@ function DeviceTable() {
 
   const clearFilters = () => {
     navigate({
-      search: () => ({ sort: "createdAt", order: "desc", page: 1, pageSize: params.pageSize }),
+      search: () => ({ sort: "warrantyExpiry", order: "asc", page: 1, pageSize: params.pageSize }),
     });
   };
 

@@ -39,7 +39,7 @@ export default function DeviceListScreen() {
 
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState<WarrantyStatus | undefined>(undefined);
-  const [sort, setSort] = useState<DeviceSortField>("createdAt");
+  const [sort, setSort] = useState<DeviceSortField>("warrantyExpiry");
   const [page, setPage] = useState(1);
   const [view, setView] = useState<"list" | "grid">("list");
 

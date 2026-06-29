@@ -46,8 +46,8 @@ export const deviceQuerySchema = z.object({
   status: z.enum(warrantyStatuses).optional(),
   brand: z.string().trim().optional(),
   category: z.string().trim().optional(),
-  sort: z.enum(deviceSortFields).default("createdAt"),
-  order: z.enum(["asc", "desc"]).default("desc"),
+  sort: z.enum(deviceSortFields).default("warrantyExpiry"),
+  order: z.enum(["asc", "desc"]).default("asc"),
   page: z.coerce.number().int().min(1).default(1),
   pageSize: z.coerce.number().int().min(1).max(100).default(10),
 });
