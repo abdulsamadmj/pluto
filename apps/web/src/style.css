@@ -8,6 +8,18 @@
   --font-geist-sans: "Geist Sans", ui-sans-serif, system-ui, sans-serif;
   --font-geist-mono: "Geist Mono", ui-monospace, monospace;
 }
+html {
+  /* Smoothly animate in-page anchor jumps (e.g. the landing nav's
+     "Mobile app" / "Why Pluto" links) instead of snapping. */
+  scroll-behavior: smooth;
+  /* Offset anchored sections below the fixed marketing nav. */
+  scroll-padding-top: 5rem;
+}
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
 body {
   @apply bg-background text-foreground font-sans antialiased;
 }
