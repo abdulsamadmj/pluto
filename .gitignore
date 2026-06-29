@@ -2,10 +2,11 @@
 node_modules
 .turbo
 *.log
-dist
 dist-ssr
 *.local
 .env
 .cache
-server/dist
+# Ignore build artifacts in workspace packages (not apps/web/dist — Vercel deploys that)
+apps/server/dist
+packages/validators/dist
 public/dist

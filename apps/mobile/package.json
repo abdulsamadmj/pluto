@@ -11,6 +11,9 @@
     "dev:clear": "expo start -c",
     "ios": "expo run:ios",
     "android": "expo run:android",
+    "ios:prod": "EXPO_PUBLIC_SERVER_URL=https://apipluto.abdulsamadmj.dev expo run:ios --configuration Release",
+    "android:prod": "EXPO_PUBLIC_SERVER_URL=https://apipluto.abdulsamadmj.dev expo run:android --variant release",
+    "ios:desktop": "bash scripts/ios-release-to-desktop.sh",
     "web": "expo start --web",
     "typecheck": "tsc --noEmit",
     "lint": "eslint \"{app,components,lib,queries}/**/*.{ts,tsx}\""

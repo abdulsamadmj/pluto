@@ -77,9 +77,15 @@ tokens and is unaffected by cookie settings.
 
    > **Common mistake:** Root Directory = `apps/web` + Output Directory =
    > `apps/web/dist` makes Vercel look for `apps/web/apps/web/dist`, which does
-   > not exist. If you insist on Root Directory = `apps/web`, Output must be
-   > just `dist`, and Install/Build must `cd ../..` first — using the repo
-   > root is simpler.
+   > not exist. If Root Directory = `apps/web`, use [`apps/web/vercel.json`](./apps/web/vercel.json)
+   > (Output = `dist`, Install/Build `cd ../..` to the monorepo root).
+   >
+   > **Do not use `web/dist`** — the app lives at `apps/web`, not `web`.
+   >
+   > **"No Output Directory named dist" after a successful build:** the repo
+   > used to gitignore all `dist/` folders, so Vercel skipped the built
+   > `apps/web/dist` artifact. That is fixed — only server/validator dists are
+   > ignored now.
 
    [`vercel.json`](./vercel.json) already encodes the recommended settings:
    - build: `pnpm turbo run build --filter=@repo/web` (Turbo builds the workspace
