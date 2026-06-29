@@ -74,9 +74,14 @@ function DesktopLanding() {
           />
 
           <MobileAppSection />
-          <Stats />
-          <CallToAction />
-          <Footer />
+
+          {/* Opaque closing block: scrolls up over the fixed 3D phone and
+              covers it (rather than the phone fading away). */}
+          <div className="relative z-10 bg-[#181818]">
+            <Stats />
+            <CallToAction />
+            <Footer />
+          </div>
         </main>
       </div>
     </MotionConfig>

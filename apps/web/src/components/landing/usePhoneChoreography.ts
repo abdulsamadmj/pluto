@@ -41,11 +41,15 @@ export function usePhoneChoreography(
   const scale = useTransform(progress, [0, 0.42, 0.55, 0.62], [1, 1, 1.05, 1.1], {
     clamp: true,
   });
-  // Fully visible through the landscape (app) beat, then fade so the closing
-  // stats/CTA/footer aren't cluttered by the fixed phone.
-  const opacity = useTransform(progress, [0, 0.66, 0.74], [1, 1, 0], {
-    clamp: true,
-  });
+  // Stay fully visible through the chapters and the landscape hand-off, then
+  // fade out only once the phone has arrived in the mobile-app (04) section —
+  // its opaque backdrop covers the phone there, so the fade just smooths the edges.
+  const opacity = useTransform(
+    progress,
+    [0, 0.66, 0.73, 1],
+    [1, 1, 0, 0],
+    { clamp: true }
+  );
 
   return {
     x: useSpring(x, spring),

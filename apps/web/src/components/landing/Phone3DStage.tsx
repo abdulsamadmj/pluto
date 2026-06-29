@@ -1,4 +1,5 @@
 import {
+  motion,
   type MotionValue,
   useMotionValueEvent,
   useReducedMotion,
@@ -31,16 +32,20 @@ export function Phone3DStage({ progress }: { progress: MotionValue<number> }) {
   const choreo = usePhoneChoreography(progress);
   const canRender3D = useMemo(() => !reduce && webglAvailable(), [reduce]);
 
-  // Once the phone fades out (stats/CTA/footer), stop driving the WebGL render
-  // loop entirely so it doesn't burn frames behind the rest of the page.
+  // The phone finishes its choreography by the app section, then the opaque
+  // closing block scrolls over it. Once we're into that block, stop driving the
+  // WebGL render loop so it doesn't burn frames behind the rest of the page.
   const [active, setActive] = useState(true);
-  useMotionValueEvent(choreo.opacity, "change", (v) => {
-    const next = v > 0.01;
+  useMotionValueEvent(progress, "change", (v) => {
+    const next = v < 0.76;
     setActive((prev) => (prev === next ? prev : next));
   });
 
   return (
-    <div className="pointer-events-none fixed inset-0 z-0 flex items-center justify-center">
+    <motion.div
+      className="pointer-events-none fixed inset-0 z-0 flex items-center justify-center"
+      style={{ opacity: choreo.opacity }}
+    >
       {canRender3D ? (
         <Suspense fallback={null}>
           <div className="h-[80vh] w-full">
@@ -50,7 +55,7 @@ export function Phone3DStage({ progress }: { progress: MotionValue<number> }) {
       ) : (
         <PhoneFallback2D />
       )}
-    </div>
+    </motion.div>
   );
 }
 

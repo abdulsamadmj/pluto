@@ -129,10 +129,6 @@ function PhoneModel({
     const sc = choreo.scale.get();
     g.scale.set(sc, sc, sc);
 
-    // No fade: hard-hide the phone once scrolled past the app section so it
-    // doesn't sit behind the closing stats/CTA/footer.
-    g.visible = choreo.opacity.get() > 0.5;
-
     // Swap screen texture by scroll chapter (last = landscape app screen).
     const p = progress.get();
     const idx = p < 0.24 ? 0 : p < 0.4 ? 1 : p < 0.52 ? 2 : 3;
