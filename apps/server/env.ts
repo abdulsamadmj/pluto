@@ -16,6 +16,20 @@ export const env = createEnv({
     // Parent domain for sharing the session cookie across subdomains
     // (e.g. ".pluto.com" so app.pluto.com ↔ api.pluto.com). Leave unset in dev.
     COOKIE_DOMAIN: z.string().min(1).optional(),
+
+    // --- Warranty-card scan (OCR) ---
+    // Required for the /devices/scan endpoint to extract fields from a photo.
+    OPENAI_API_KEY: z.string().min(1),
+    // Vision-capable model with structured outputs. gpt-4o-mini is the cheap default.
+    OPENAI_MODEL: z.string().min(1).optional().default("gpt-4o-mini"),
+
+    // --- Cloudflare R2 (S3-compatible) for storing the card image ---
+    R2_ACCOUNT_ID: z.string().min(1),
+    R2_ACCESS_KEY_ID: z.string().min(1),
+    R2_SECRET_ACCESS_KEY: z.string().min(1),
+    R2_BUCKET: z.string().min(1),
+    // Public base URL for served images. When unset, the API presigns GET URLs.
+    R2_PUBLIC_URL: z.string().url().optional(),
   },
 
   /**
@@ -29,6 +43,13 @@ export const env = createEnv({
     VITE_SERVER_URL: process.env.VITE_SERVER_URL,
     BETTER_AUTH_URL: process.env.BETTER_AUTH_URL,
     COOKIE_DOMAIN: process.env.COOKIE_DOMAIN,
+    OPENAI_API_KEY: process.env.OPENAI_API_KEY,
+    OPENAI_MODEL: process.env.OPENAI_MODEL,
+    R2_ACCOUNT_ID: process.env.R2_ACCOUNT_ID,
+    R2_ACCESS_KEY_ID: process.env.R2_ACCESS_KEY_ID,
+    R2_SECRET_ACCESS_KEY: process.env.R2_SECRET_ACCESS_KEY,
+    R2_BUCKET: process.env.R2_BUCKET,
+    R2_PUBLIC_URL: process.env.R2_PUBLIC_URL,
   },
 
   emptyStringAsUndefined: true,
