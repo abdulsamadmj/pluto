@@ -72,6 +72,7 @@ function EditDevicePage() {
               notes: data.notes ?? "",
             }}
             submitLabel="Save changes"
+            showScan={false}
             isSubmitting={mutation.isPending}
             onCancel={() => navigate({ to: "/devices/$id", params: { id } })}
             onSubmit={(values) =>

@@ -2,6 +2,7 @@ import {
   createHonoMutationOptions,
   createHonoQueryOptions,
 } from "@reno-stack/hono-react-query";
+import { type ScanResult } from "@repo/validators";
 import { client } from "../utils/hono-client";
 
 /**
@@ -56,3 +57,44 @@ export const updateDeviceMutationOptions = createHonoMutationOptions(
 export const deleteDeviceMutationOptions = createHonoMutationOptions(
   client.devices[":id"].$delete
 );
+
+/**
+ * Upload a warranty-card / receipt photo to `POST /devices/scan` for OCR.
+ * This is multipart (not a JSON body), so it bypasses the RPC client and uses a
+ * plain fetch — still sending the auth cookie via `credentials: "include"`.
+ * Returns the stored R2 object key plus the fields the model extracted.
+ */
+export async function scanWarrantyCard(file: File): Promise<ScanResult> {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const res = await fetch(`${import.meta.env.VITE_SERVER_URL}/devices/scan`, {
+    method: "POST",
+    body: formData,
+    credentials: "include",
+  });
+  if (!res.ok) {
+    throw new Error(`Scan failed (${res.status})`);
+  }
+  return (await res.json()) as ScanResult;
+}
+
+/**
+ * Attach a warranty document (image or PDF) to R2 without OCR, via
+ * `POST /devices/upload`. Returns the stored object key to submit with the
+ * device. Like `scanWarrantyCard`, this is multipart so it uses a plain fetch.
+ */
+export async function uploadDocument(file: File): Promise<{ key: string }> {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const res = await fetch(`${import.meta.env.VITE_SERVER_URL}/devices/upload`, {
+    method: "POST",
+    body: formData,
+    credentials: "include",
+  });
+  if (!res.ok) {
+    throw new Error(`Upload failed (${res.status})`);
+  }
+  return (await res.json()) as { key: string };
+}
