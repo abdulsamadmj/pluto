@@ -1,8 +1,8 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "installCommand": "pnpm install --frozen-lockfile",
-  "buildCommand": "pnpm turbo run build --filter=@repo/web",
-  "outputDirectory": "apps/web/dist",
+  "buildCommand": "pnpm turbo run build --filter=@repo/web && rm -rf web-out && cp -R apps/web/dist web-out",
+  "outputDirectory": "web-out",
   "framework": null,
   "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
 }

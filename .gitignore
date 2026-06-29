@@ -6,7 +6,10 @@ dist-ssr
 *.local
 .env
 .cache
-# Ignore build artifacts in workspace packages (not apps/web/dist — Vercel deploys that)
+# Ignore build artifacts in workspace packages (Vercel copies to web-out — see vercel.json)
 apps/server/dist
 packages/validators/dist
+apps/web/dist
+web-out
+.vercel-out
 public/dist
