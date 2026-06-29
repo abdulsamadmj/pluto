@@ -31,7 +31,8 @@ export function MobileLanding() {
           again.
         </h1>
         <p className="mt-4 max-w-xs text-sm text-zinc-400">
-          Track every device and its warranty coverage — right from your pocket.
+          Snap a receipt to add a device, track its warranty, and get alerts before
+          coverage ends — right from your pocket.
         </p>
 
         <Button asChild size="lg" className="mt-8">
