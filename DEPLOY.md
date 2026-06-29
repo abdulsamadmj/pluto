@@ -62,7 +62,9 @@ tokens and is unaffected by cookie settings.
 1. **New Project → Import** this repo. Leave the **Root Directory** as the repo
    root (so the pnpm workspace installs).
 2. Vercel reads [`vercel.json`](./vercel.json):
-   - build: `pnpm --filter @repo/web build`
+   - build: `pnpm turbo run build --filter=@repo/web` (Turbo builds the workspace
+     deps `@repo/validators` and `@repo/server` first — web consumes their
+     generated `dist` type declarations, which are gitignored)
    - output: `apps/web/dist`
    - SPA fallback rewrite to `/index.html`
 3. Add an **Environment Variable** (Production):

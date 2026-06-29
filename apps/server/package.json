@@ -17,7 +17,7 @@
         "dev": "pnpm with-env pnpm --filter @repo/server --parallel \"/^dev:.*/\"",
         "dev:tsc": "tsc -p tsconfig.build.json --watch",
         "dev:node": "tsx watch src/index.ts",
-        "build": "pnpm with-env pnpm --filter @repo/server --parallel \"/^build:.*/\"",
+        "build": "pnpm --filter @repo/server --parallel \"/^build:.*/\"",
         "build:dev": "tsc -p tsconfig.build.json",
         "build:node": "tsc",
         "db:studio": "pnpm with-env drizzle-kit studio",
