@@ -22,6 +22,7 @@ import {
 } from "drizzle-orm";
 import { db } from "../db/index";
 import * as schema from "../db/schema";
+import { getCardUrl } from "./storage.service";
 
 export type DeviceRow = typeof schema.device.$inferSelect;
 
@@ -139,7 +140,15 @@ export async function getDeviceById(id: string) {
     },
   });
   if (!found) return null;
-  return { ...found, status: getWarrantyStatus(found.warrantyExpiry) };
+  // Resolve the stored card image (if any) to a loadable URL for the detail view.
+  const warrantyCardUrl = found.warrantyCardKey
+    ? await getCardUrl(found.warrantyCardKey)
+    : null;
+  return {
+    ...found,
+    warrantyCardUrl,
+    status: getWarrantyStatus(found.warrantyExpiry),
+  };
 }
 
 export async function updateDeviceNotes(id: string, notes: string) {
