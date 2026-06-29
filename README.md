@@ -436,5 +436,17 @@ cohesive.
 
 ---
 
+## 🛣️ Roadmap / ToDo
+
+Planned follow-ups not yet implemented:
+
+- [ ] **Profile page (mobile)** — a dedicated screen showing the signed-in user's
+  name/email with the ability to edit account details.
+- [ ] **Proper logout flow (mobile)** — move sign-out into the profile screen with
+  a clear confirmation, full session/token teardown, query-cache reset, and a
+  reliable redirect back to the auth stack.
+
+---
+
 _This project was scaffolded from the Reno Stack; the original starter README is
 preserved as `README.reno-original.md`._
