@@ -42,8 +42,8 @@ function roundedPlane(w: number, h: number, r: number): THREE.ShapeGeometry {
 const SCREEN_URLS = [
   "/screens/01-catalog.png",
   "/screens/02-alerts.png",
-  "/screens/03-timeline.png",
-  "/screens/app-landscape.png",
+  "/screens/03-dash.png",
+  "/screens/landscape.png",
 ];
 
 function PhoneModel({
