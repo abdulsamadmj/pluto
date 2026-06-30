@@ -42,6 +42,18 @@ function DesktopLanding() {
     offset: ["start start", "end end"],
   });
 
+  // Lock scrolling onto each phase so the phone settles at its per-chapter rest
+  // pose. Applied to the document scroller and reverted when leaving the page,
+  // so it doesn't affect the app's other (freely-scrolling) routes.
+  useEffect(() => {
+    const html = document.documentElement;
+    const prev = html.style.scrollSnapType;
+    html.style.scrollSnapType = "y mandatory";
+    return () => {
+      html.style.scrollSnapType = prev;
+    };
+  }, []);
+
   return (
     <MotionConfig reducedMotion="user">
       <div ref={pageRef} className="relative min-h-screen bg-[#181818] text-zinc-50">
@@ -146,7 +158,7 @@ function MarketingNav() {
 
 function Hero() {
   return (
-    <section className="relative flex min-h-screen flex-col items-center justify-between px-5 pb-12 pt-12 text-center">
+    <section className="relative flex min-h-screen snap-start flex-col items-center justify-between px-5 pb-12 pt-12 text-center">
       <motion.div
         initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
@@ -197,7 +209,7 @@ function Stats() {
   return (
     <section
       id="stats"
-      className="relative border-t border-white/5 bg-[#181818] py-28"
+      className="relative snap-start border-t border-white/5 bg-[#181818] py-28"
     >
       <div className="mx-auto grid max-w-6xl grid-cols-2 gap-10 px-5 text-center lg:grid-cols-4">
         {STATS.map(([value, label]) => (
@@ -250,7 +262,7 @@ function formatCompact(n: number): string {
 
 function CallToAction() {
   return (
-    <section className="relative px-5 py-28">
+    <section className="relative snap-start px-5 py-28">
       <div className="mx-auto max-w-4xl">
         <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-primary/20 via-emerald-500/10 to-transparent p-10 text-center md:p-16">
           <h2 className="font-display text-4xl leading-tight md:text-5xl">
@@ -270,7 +282,7 @@ function CallToAction() {
 
 function Footer() {
   return (
-    <footer className="relative border-t border-white/5 bg-[#181818] py-10">
+    <footer className="relative snap-start border-t border-white/5 bg-[#181818] py-10">
       <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-5 text-sm text-zinc-500 sm:flex-row">
         <Logo />
         <p className="font-mono text-xs">

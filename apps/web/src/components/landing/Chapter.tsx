@@ -30,7 +30,7 @@ export function Chapter({
   children?: ReactNode;
 }) {
   return (
-    <section className="relative flex min-h-screen items-center px-5">
+    <section className="relative flex min-h-screen snap-start items-center px-5">
       <div className="mx-auto w-full max-w-6xl">
         <motion.div
           variants={reveal}
