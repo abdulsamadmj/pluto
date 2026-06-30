@@ -44,9 +44,11 @@ function roundedPlane(w: number, h: number, r: number): THREE.ShapeGeometry {
   return geo;
 }
 
-// Portrait screens shown per scroll chapter, then the landscape app screen.
+// Portrait screens shown per scroll chapter (in chapter order), then the
+// landscape app screen: Capture → Catalog → Stay ahead → Dashboard → app.
 const SCREEN_URLS = [
-  "/screens/01-catalog.png",
+  "/screens/01-capture.png",
+  "/screens/00-catalog.png",
   "/screens/02-alerts.png",
   "/screens/03-dash.png",
   "/screens/landscape.png",
@@ -125,10 +127,19 @@ function PhoneModel({
     const sc = choreo.scale.get();
     g.scale.set(sc, sc, sc);
 
-    // Swap screen texture by scroll chapter (last = landscape app screen).
+    // Target screen by story chapter (centers 0.2/0.4/0.6/0.8, app at 1.0);
+    // last = landscape app screen.
     const p = progress.get();
-    const idx = p < 0.24 ? 0 : p < 0.4 ? 1 : p < 0.52 ? 2 : 3;
-    if (screenMat.current && screenMat.current.map !== textures[idx]) {
+    const idx = p < 0.3 ? 0 : p < 0.5 ? 1 : p < 0.7 ? 2 : p < 0.9 ? 3 : 4;
+    // Commit the swap only while the screen is turned away from the camera
+    // (mid-flip → cos(rotationY) < 0), so the change is never seen. The
+    // landscape hand-off is exempt: it happens during the in-plane Z spin.
+    const hidden = Math.cos(g.rotation.y) < 0;
+    if (
+      screenMat.current &&
+      screenMat.current.map !== textures[idx] &&
+      (hidden || idx === 4)
+    ) {
       screenMat.current.map = textures[idx];
       screenMat.current.needsUpdate = true;
     }

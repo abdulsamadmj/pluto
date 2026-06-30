@@ -27,9 +27,17 @@ function webglAvailable(): boolean {
  * canvas is lazy-loaded (keeps three.js out of the initial chunk). When the user
  * prefers reduced motion or WebGL is unavailable, a static 2D phone is shown.
  */
-export function Phone3DStage({ progress }: { progress: MotionValue<number> }) {
+export function Phone3DStage({
+  progress,
+  storyProgress,
+}: {
+  /** Whole-page scroll progress — drives the closing-block fade + render gating. */
+  progress: MotionValue<number>;
+  /** Story-only progress (hero→mobile) — drives the phone's choreography. */
+  storyProgress: MotionValue<number>;
+}) {
   const reduce = useReducedMotion();
-  const choreo = usePhoneChoreography(progress);
+  const choreo = usePhoneChoreography(storyProgress, progress);
   const canRender3D = useMemo(() => !reduce && webglAvailable(), [reduce]);
 
   // The phone finishes its choreography by the app section, then the opaque
@@ -37,7 +45,7 @@ export function Phone3DStage({ progress }: { progress: MotionValue<number> }) {
   // WebGL render loop so it doesn't burn frames behind the rest of the page.
   const [active, setActive] = useState(true);
   useMotionValueEvent(progress, "change", (v) => {
-    const next = v < 0.76;
+    const next = v < 0.99;
     setActive((prev) => (prev === next ? prev : next));
   });
 
@@ -49,7 +57,7 @@ export function Phone3DStage({ progress }: { progress: MotionValue<number> }) {
       {canRender3D ? (
         <Suspense fallback={null}>
           <div className="h-[80vh] w-full">
-            <Phone3D choreo={choreo} progress={progress} active={active} />
+            <Phone3D choreo={choreo} progress={storyProgress} active={active} />
           </div>
         </Suspense>
       ) : (

@@ -30,8 +30,15 @@ function LandingPage() {
 
 function DesktopLanding() {
   const pageRef = useRef<HTMLDivElement>(null);
+  const storyRef = useRef<HTMLDivElement>(null);
+  // Whole-page progress drives the closing-block fade; story progress spans only
+  // the six full-screen story sections so the phone's per-chapter stops are exact.
   const { scrollYProgress } = useScroll({
     target: pageRef,
+    offset: ["start start", "end end"],
+  });
+  const { scrollYProgress: storyProgress } = useScroll({
+    target: storyRef,
     offset: ["start start", "end end"],
   });
 
@@ -39,11 +46,12 @@ function DesktopLanding() {
     <MotionConfig reducedMotion="user">
       <div ref={pageRef} className="relative min-h-screen bg-[#181818] text-zinc-50">
         <MarketingNav />
-        <Phone3DStage progress={scrollYProgress} />
+        <Phone3DStage progress={scrollYProgress} storyProgress={storyProgress} />
         <ScrollProgressRail progress={scrollYProgress} />
 
         <main className="relative z-10">
-          <Hero />
+          <div ref={storyRef}>
+            <Hero />
 
           {/* Text sits opposite the phone's scroll position (phone goes
               left → text right, phone right → text left). */}
@@ -85,7 +93,8 @@ function DesktopLanding() {
             body="Total devices, active coverage, what's expiring soon, and what's already lapsed — your whole warranty picture on one dashboard."
           />
 
-          <MobileAppSection />
+            <MobileAppSection />
+          </div>
 
           {/* Opaque closing block: scrolls up over the fixed 3D phone and
               covers it (rather than the phone fading away). */}
